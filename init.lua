@@ -274,6 +274,10 @@ vim.o.undodir = vim.fn.expand('$HOME/.config/nvim/undo')
 vim.o.undolevels = 10000
 vim.o.undoreload = 10000
 
+-- shiftwidth and tabstop
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
+
 -- Case-insensitive searching UNLESS \C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
@@ -645,9 +649,9 @@ cmp.setup {
 -- copilot
 vim.g.copilot_filetypes = {markdown = true, typescript = true, javascript = true, css = true, html = true, dockerfile = true, java = true, jsdoc = true, json = true, llvm = true, lua = true, luadoc = true, make = true, python = true, rust = true, sql = true, toml = true, tsx = true, vim = true, vimdoc = true, query = true, xml = true, yaml = true}
 
+vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_keycodes = false, silent  = true })
+vim.keymap.set('i', '<M-y>', '<Plug>(copilot-accept-word)')
 vim.g.copilot_no_tab_map = true
-vim.g.copilot_assume_mapped = true
-vim.keymap.set('i', '<S-Tab>', 'copilot#Accept("<CR>")', { expr = true, silent = true })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
