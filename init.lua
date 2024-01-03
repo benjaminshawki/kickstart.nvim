@@ -139,21 +139,25 @@ require('lazy').setup({
       end,
     },
   },
-
   {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
+    "zootedb0t/citruszest.nvim",
+    lazy = false,
     priority = 1000,
-    config = function()
-      -- Setup the theme style
-      require('onedark').setup {
-          style = 'darker'  -- Setting the style
-      }
-      -- Load the theme
-      require('onedark').load()
-      vim.cmd.colorscheme 'onedark'
-    end,
   },
+  -- {
+  --   -- theme inspired by atom
+  --   'navarasu/onedark.nvim',
+  --   priority = 1000,
+  --   config = function()
+  --     -- setup the theme style
+  --     require('onedark').setup {
+  --         style = 'darker'  -- setting the style
+  --     }
+  --     -- load the theme
+  --     require('onedark').load()
+  --     vim.cmd.colorscheme 'onedark'
+  --   end,
+  -- },
   {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
@@ -161,7 +165,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        theme = 'citruszest',
         component_separators = '|',
         section_separators = '',
       },
@@ -241,6 +245,7 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
+vim.cmd("colorscheme citruszest")
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
