@@ -144,20 +144,6 @@ require('lazy').setup({
     lazy = false,
     priority = 1000,
   },
-  -- {
-  --   -- theme inspired by atom
-  --   'navarasu/onedark.nvim',
-  --   priority = 1000,
-  --   config = function()
-  --     -- setup the theme style
-  --     require('onedark').setup {
-  --         style = 'darker'  -- setting the style
-  --     }
-  --     -- load the theme
-  --     require('onedark').load()
-  --     vim.cmd.colorscheme 'onedark'
-  --   end,
-  -- },
   {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
@@ -317,6 +303,10 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.api.nvim_set_keymap('n', '<leader>bn', ':bn<CR>', {noremap = true})
 vim.api.nvim_set_keymap('n', '<leader>tn', 'gt', {noremap = true})
 vim.api.nvim_set_keymap('n', '<C-w>h', '<C-w>s', {noremap = true})
+
+-- Compile and open output
+vim.keymap.set('n', '<leader>G', ':w! | !"$DOTFILES"/nvim/scripts/comp <c-r>%<CR><CR>')
+vim.keymap.set('n', '<leader>o', ':!"DOTFILES"/nvim/scripts/opout <c-r>%<CR><CR>')
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
