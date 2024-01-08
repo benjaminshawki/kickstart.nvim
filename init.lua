@@ -643,5 +643,9 @@ vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_ke
 vim.keymap.set('i', '<M-y>', '<Plug>(copilot-accept-word)')
 vim.g.copilot_no_tab_map = true
 
+-- spell
+vim.opt.spell = true
+vim.opt.spelllang = {'en', 'nl'}
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
