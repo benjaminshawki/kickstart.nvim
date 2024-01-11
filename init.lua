@@ -220,8 +220,9 @@ require('lazy').setup({
     cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
     ft = { "markdown" },
     build = function() vim.fn["mkdp#util#install"]() end,
-  }
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
+  },
+  'conornewton/vim-pandoc-markdown-preview',
+--   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
@@ -305,8 +306,8 @@ vim.api.nvim_set_keymap('n', '<leader>tn', 'gt', {noremap = true})
 vim.api.nvim_set_keymap('n', '<C-w>h', '<C-w>s', {noremap = true})
 
 -- Compile and open output
-vim.keymap.set('n', '<leader>G', ':w! | !"$DOTFILES"/nvim/scripts/comp <c-r>%<CR><CR>')
-vim.keymap.set('n', '<leader>o', ':!"DOTFILES"/nvim/scripts/opout <c-r>%<CR><CR>')
+-- vim.keymap.set('n', '<leader>G', ':w! | !"$DOTFILES"/nvim/scripts/comp <c-r>%<CR><CR>')
+-- vim.keymap.set('n', '<leader>o', ':!"DOTFILES"/nvim/scripts/opout <c-r>%<CR><CR>')
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
@@ -542,12 +543,23 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
+  --clangd = {},
+  --gopls = {},
+  pyright = {},
+  rust_analyzer = {},
+  tsserver = {},
+  bashls = {},
+  dockerls = {},
+  cssls = {},
+  html = { filetypes = { 'html', 'twig', 'hbs'} },
+  jdtls = {},
+  yamlls = {},
+  jsonls = {},
+  marksman = {},
+  graphql = {},
+  eslint = {},
+  tailwindcss = {},
+  sqlls = {},
 
   lua_ls = {
     Lua = {
@@ -646,6 +658,38 @@ vim.g.copilot_no_tab_map = true
 -- spell
 vim.opt.spell = true
 vim.opt.spelllang = {'en', 'nl'}
+
+-- vim-pandoc-markdown-preview
+vim.g.md_pdf_viewer = 'zathura'
+-- function set_md_args()
+--     local cwd = vim.fn.getcwd()
+--   print(vim.inspect('--bibliography=' .. cwd .. '/ref.bib --citeproc'))
+--     vim.g.md_args = '--bibliography=' .. cwd .. 'ref.bib --citeproc'
+-- end
+-- 
+-- vim.cmd('autocmd BufEnter *.md call v:lua.set_md_args()')
+
+
+-- Function to set bibliography path
+--local function set_bibliography_path()
+--  -- Get the full path of the current file
+--  local file_path = vim.fn.expand('%:p')
+--  -- Extract the directory from the full path
+--  local file_dir = vim.fn.fnamemodify(file_path, ':h')
+--  -- Set the markdown argument with the bibliography path
+--  vim.g.md_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc'
+--  print(vim.inspect(vim.g.md_args))
+--end
+--
+---- Autocommand to set the bibliography path for markdown files
+--vim.api.nvim_create_autocmd('FileType', {
+--   pattern = 'markdown',
+--   callback = set_bibliography_path
+--})
+
+-- vim.g.md_args = '--bibliography=ref.bib --citeproc'
+-- print(vim.inspect(''%:p'))
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
