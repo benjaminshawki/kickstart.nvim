@@ -221,7 +221,8 @@ require('lazy').setup({
     ft = { "markdown" },
     build = function() vim.fn["mkdp#util#install"]() end,
   },
-  'conornewton/vim-pandoc-markdown-preview',
+  --'conornewton/vim-pandoc-markdown-preview',
+  'benjaminshawki/markdown-preview',
 --   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
@@ -561,6 +562,7 @@ local servers = {
   tailwindcss = {},
   sqlls = {},
 
+
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -658,38 +660,73 @@ vim.g.copilot_no_tab_map = true
 -- spell
 vim.opt.spell = true
 vim.opt.spelllang = {'en', 'nl'}
-
--- vim-pandoc-markdown-preview
-vim.g.md_pdf_viewer = 'zathura'
--- function set_md_args()
---     local cwd = vim.fn.getcwd()
---   print(vim.inspect('--bibliography=' .. cwd .. '/ref.bib --citeproc'))
---     vim.g.md_args = '--bibliography=' .. cwd .. 'ref.bib --citeproc'
--- end
--- 
--- vim.cmd('autocmd BufEnter *.md call v:lua.set_md_args()')
-
-
+--[[
 -- Function to set bibliography path
---local function set_bibliography_path()
---  -- Get the full path of the current file
---  local file_path = vim.fn.expand('%:p')
---  -- Extract the directory from the full path
---  local file_dir = vim.fn.fnamemodify(file_path, ':h')
---  -- Set the markdown argument with the bibliography path
---  vim.g.md_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc'
---  print(vim.inspect(vim.g.md_args))
---end
---
----- Autocommand to set the bibliography path for markdown files
---vim.api.nvim_create_autocmd('FileType', {
---   pattern = 'markdown',
---   callback = set_bibliography_path
---})
+local function set_bibliography_path()
+    local file_path = vim.fn.expand('%:p')
+    local file_dir = vim.fn.fnamemodify(file_path, ':h')
+    vim.g.md_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc'
+end
 
--- vim.g.md_args = '--bibliography=ref.bib --citeproc'
--- print(vim.inspect(''%:p'))
+-- Autocommand to set the bibliography path for markdown files
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'markdown',
+    callback = set_bibliography_path
+})
 
+local preview_running = false
+local pdf_viewer = "zathura"
 
+local function CompileSynchronous()
+    local md_args = vim.g.md_args or ""
+    local file_path = vim.fn.expand("%:p")
+    local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
+    local command = "pandoc " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
+
+    os.execute(command)
+end
+
+local function OpenPdf()
+    if not preview_running then
+        return
+    end
+
+    local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
+
+    -- Compile the PDF
+    CompileSynchronous()
+
+    -- Open Zathura with the PDF
+    os.execute(pdf_viewer .. " " .. vim.fn.shellescape(pdf_path) .. " &")
+end
+
+local function StartPreview()
+    preview_running = true
+    OpenPdf()
+end
+
+local function StopPreview()
+    preview_running = false
+end
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+    pattern = {"*.md", "*.markdown", "*.pandoc"},
+    callback = function()
+        if preview_running then
+            CompileSynchronous()
+        end
+    end,
+})
+
+vim.api.nvim_create_user_command("StartMdPreview", StartPreview, {})
+vim.api.nvim_create_user_command("StopMdPreview", StopPreview, {})
+]]--
+-- Replace with your preferred PDF viewer
+vim.g.markdown_preview_pdf_viewer = "zathura"
+
+-- Since I use a bibliography file, I need to set the path to it
+local file_path = vim.fn.expand('%:p')
+local file_dir = vim.fn.fnamemodify(file_path, ':h')
+vim.g.markdown_preview_pandoc_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
