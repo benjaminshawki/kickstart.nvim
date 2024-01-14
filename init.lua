@@ -222,7 +222,7 @@ require('lazy').setup({
     build = function() vim.fn["mkdp#util#install"]() end,
   },
   --'conornewton/vim-pandoc-markdown-preview',
-  'benjaminshawki/markdown-preview',
+  --'benjaminshawki/markdown-preview',
 --   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
@@ -660,7 +660,7 @@ vim.g.copilot_no_tab_map = true
 -- spell
 vim.opt.spell = true
 vim.opt.spelllang = {'en', 'nl'}
---[[
+
 -- Function to set bibliography path
 local function set_bibliography_path()
     local file_path = vim.fn.expand('%:p')
@@ -720,13 +720,13 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 
 vim.api.nvim_create_user_command("StartMdPreview", StartPreview, {})
 vim.api.nvim_create_user_command("StopMdPreview", StopPreview, {})
-]]--
--- Replace with your preferred PDF viewer
+
+
+--[[ Replace with your preferred PDF viewer
 vim.g.markdown_preview_pdf_viewer = "zathura"
 
 -- Since I use a bibliography file, I need to set the path to it
 local file_path = vim.fn.expand('%:p')
 local file_dir = vim.fn.fnamemodify(file_path, ':h')
 vim.g.markdown_preview_pandoc_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc'
--- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+--]]
