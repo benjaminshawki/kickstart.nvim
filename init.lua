@@ -221,6 +221,12 @@ require('lazy').setup({
     ft = { "markdown" },
     build = function() vim.fn["mkdp#util#install"]() end,
   },
+  {
+  	"vuki656/package-info.nvim",
+  	ft = "json",
+  	dependencies = "MunifTanjim/nui.nvim",
+  	opts = {},
+  },
   --'conornewton/vim-pandoc-markdown-preview',
   --'benjaminshawki/markdown-preview',
 --   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
@@ -367,6 +373,10 @@ local function live_grep_git_root()
   if git_root then
     require('telescope.builtin').live_grep {
       search_dirs = { git_root },
+      layout_config = {
+        width = .99,
+        height = .99,
+      },
     }
   end
 end
@@ -381,6 +391,10 @@ vim.keymap.set('n', '<leader>/', function()
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
     winblend = 10,
     previewer = false,
+    layout_config = {
+      width = .99,
+      height = .99,
+    },
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
@@ -388,6 +402,10 @@ local function telescope_live_grep_open_files()
   require('telescope.builtin').live_grep {
     grep_open_files = true,
     prompt_title = 'Live Grep in Open Files',
+    layout_config = {
+      width = .99,
+      height = .99,
+    },
   }
 end
 vim.keymap.set('n', '<leader>s/', telescope_live_grep_open_files, { desc = '[S]earch [/] in Open Files' })
@@ -522,6 +540,7 @@ require('which-key').register {
   ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
   ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
   ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+  ['<leader>n'] = { name = '[N]pm Info', _ = 'which_key_ignore' },
 }
 -- register which-key VISUAL mode
 -- required for visual <leader>hs (hunk stage) to work
@@ -661,6 +680,30 @@ vim.g.copilot_no_tab_map = true
 vim.opt.spell = true
 vim.opt.spelllang = {'en', 'nl'}
 
+-- Package Info
+pcall(require("telescope").load_extension, "package_info")
+-- Show dependency versions
+vim.keymap.set({ "n" }, "<LEADER>ns", require("package-info").show, { silent = true, noremap = true, desc = 'show'})
+
+-- Hide dependency versions
+vim.keymap.set({ "n" }, "<LEADER>nc", require("package-info").hide, { silent = true, noremap = true, desc = 'hide' })
+
+-- Toggle dependency versions
+vim.keymap.set({ "n" }, "<LEADER>nt", require("package-info").toggle, { silent = true, noremap = true, desc = 'toggle' })
+
+-- Update dependency on the line
+vim.keymap.set({ "n" }, "<LEADER>nu", require("package-info").update, { silent = true, noremap = true, desc = 'update' })
+
+-- Delete dependency on the line
+vim.keymap.set({ "n" }, "<LEADER>nd", require("package-info").delete, { silent = true, noremap = true, desc = 'delete' })
+
+-- Install a new dependency
+vim.keymap.set({ "n" }, "<LEADER>ni", require("package-info").install, { silent = true, noremap = true, desc = 'install' })
+
+-- Install a different dependency version
+vim.keymap.set({ "n" }, "<LEADER>np", require("package-info").change_version, { silent = true, noremap = true, desc = 'change_version' })
+
+-- Md Preview
 -- Function to set bibliography path
 local function set_bibliography_path()
     local file_path = vim.fn.expand('%:p')
