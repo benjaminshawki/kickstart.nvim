@@ -337,6 +337,10 @@ require('telescope').setup {
         ['<C-d>'] = false,
       },
     },
+    layout_config = {
+      width = .99,
+      height = .99,
+    },
   },
 }
 
@@ -373,10 +377,6 @@ local function live_grep_git_root()
   if git_root then
     require('telescope.builtin').live_grep {
       search_dirs = { git_root },
-      layout_config = {
-        width = .99,
-        height = .99,
-      },
     }
   end
 end
@@ -402,17 +402,14 @@ local function telescope_live_grep_open_files()
   require('telescope.builtin').live_grep {
     grep_open_files = true,
     prompt_title = 'Live Grep in Open Files',
-    layout_config = {
-      width = .99,
-      height = .99,
-    },
   }
 end
+
 vim.keymap.set('n', '<leader>s/', telescope_live_grep_open_files, { desc = '[S]earch [/] in Open Files' })
 vim.keymap.set('n', '<leader>ss', require('telescope.builtin').builtin, { desc = '[S]earch [S]elect Telescope' })
 vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
-vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
+vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags,  { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
@@ -580,7 +577,10 @@ local servers = {
   eslint = {},
   tailwindcss = {},
   sqlls = {},
-
+  --grammarly = {
+    --enable = true,
+    --filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
+  --},
 
   lua_ls = {
     Lua = {
@@ -724,7 +724,7 @@ local function CompileSynchronous()
     local md_args = vim.g.md_args or ""
     local file_path = vim.fn.expand("%:p")
     local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
-    local command = "pandoc " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
+    local command = "pandoc -F pandoc-crossref " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
 
     os.execute(command)
 end
