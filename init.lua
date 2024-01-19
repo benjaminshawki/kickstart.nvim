@@ -214,6 +214,7 @@ require('lazy').setup({
 
   'jez/vim-superman',
   'github/copilot.vim',
+
   -- install without yarn or npm
   {
     "iamcco/markdown-preview.nvim",
@@ -708,7 +709,7 @@ vim.keymap.set({ "n" }, "<LEADER>np", require("package-info").change_version, { 
 local function set_bibliography_path()
     local file_path = vim.fn.expand('%:p')
     local file_dir = vim.fn.fnamemodify(file_path, ':h')
-    vim.g.md_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc'
+    vim.g.md_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc --csl=' .. file_dir .. '/apa.csl'
 end
 
 -- Autocommand to set the bibliography path for markdown files
