@@ -725,10 +725,12 @@ local function CompileSynchronous()
     local md_args = vim.g.md_args or ""
     local file_path = vim.fn.expand("%:p")
     local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
-    local command = "pandoc -F pandoc-crossref " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
+    local hyperref_options = "-V colorlinks -V linkcolor=blue -V urlcolor=red"
+    local command = "pandoc -F pandoc-crossref " .. hyperref_options .. " " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
 
     os.execute(command)
 end
+
 
 local function OpenPdf()
     if not preview_running then
