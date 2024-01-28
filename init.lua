@@ -3,6 +3,7 @@
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.o.showbreak = '↪ ' -- Sets a string to be shown before lines that have been soft-wrapped
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -575,7 +576,7 @@ local servers = {
   jsonls = {},
   marksman = {},
   graphql = {},
-  eslint = {},
+  eslint = { cmd = { '$HOME/.volta/tools/image/packages/eslint/bin/eslint' } },
   tailwindcss = {},
   sqlls = {},
   --grammarly = {
@@ -664,6 +665,7 @@ cmp.setup {
     end, { 'i', 's' }),
   },
   sources = {
+    { name = 'copilot' },
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'path' },
