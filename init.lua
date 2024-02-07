@@ -193,6 +193,7 @@ require('lazy').setup({
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    --tag = 'v0.9.2',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
     },
@@ -435,7 +436,7 @@ vim.defer_fn(function()
     incremental_selection = {
       enable = true,
       keymaps = {
-        init_selectionu= '<c-space>',
+        init_selection= '<c-space>',
         node_incremental = '<c-space>',
         scope_incremental = '<c-s>',
         node_decremental = '<M-space>',
@@ -562,8 +563,8 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  --clangd = {},
-  --gopls = {},
+  clangd = {},
+  gopls = {},
   pyright = {},
   rust_analyzer = {},
   tsserver = {},
