@@ -230,6 +230,12 @@ require('lazy').setup({
   	dependencies = "MunifTanjim/nui.nvim",
   	opts = {},
   },
+  {
+    "prettier/vim-prettier",
+    run = "yarn install",
+    ft = { "javascript", "typescript", "css", "less", "scss", "json", "graphql", "markdown", "vue", "yaml", "html" },
+  },
+
   --'conornewton/vim-pandoc-markdown-preview',
   --'benjaminshawki/markdown-preview',
 --   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
@@ -274,6 +280,20 @@ vim.o.undoreload = 10000
 -- shiftwidth and tabstop
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
+
+
+-- Set indentation for Java files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  callback = function()
+    -- Set the number of spaces for each indentation
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    -- Use spaces instead of tabs
+    vim.opt_local.expandtab = true
+  end,
+})
+
 
 -- Case-insensitive searching UNLESS \C or capital in search
 vim.o.ignorecase = true
@@ -672,6 +692,10 @@ cmp.setup {
     { name = 'path' },
   },
 }
+
+-- Prettier
+vim.g["prettier#autoformat"] = 1
+vim.g["prettier#autoformat_require_pragma"] = 0
 
 -- copilot
 vim.g.copilot_filetypes = {markdown = true, typescript = true, javascript = true, css = true, html = true, dockerfile = true, java = true, jsdoc = true, json = true, llvm = true, lua = true, luadoc = true, make = true, python = true, rust = true, sql = true, toml = true, tsx = true, vim = true, vimdoc = true, query = true, xml = true, yaml = true}
