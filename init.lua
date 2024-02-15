@@ -141,7 +141,7 @@ require('lazy').setup({
     },
   },
   {
-    "zootedb0t/citruszest.nvim",
+    "benjaminshawki/citruszest.nvim",
     lazy = false,
     priority = 1000,
   },
@@ -233,8 +233,10 @@ require('lazy').setup({
   {
     "prettier/vim-prettier",
     run = "yarn install",
-    ft = { "javascript", "typescript", "css", "less", "scss", "json", "graphql", "markdown", "vue", "yaml", "html" },
+    ft = { "javascript", "typescript", "css", "less", "scss", "json", "graphql", "vue", "yaml", "html" },
   },
+  -- "vim-pandoc/vim-pandoc",
+  -- "vim-pandoc/vim-pandoc-syntax",
 
   --'conornewton/vim-pandoc-markdown-preview',
   --'benjaminshawki/markdown-preview',
@@ -698,7 +700,31 @@ vim.g["prettier#autoformat"] = 1
 vim.g["prettier#autoformat_require_pragma"] = 0
 
 -- copilot
-vim.g.copilot_filetypes = {markdown = true, typescript = true, javascript = true, css = true, html = true, dockerfile = true, java = true, jsdoc = true, json = true, llvm = true, lua = true, luadoc = true, make = true, python = true, rust = true, sql = true, toml = true, tsx = true, vim = true, vimdoc = true, query = true, xml = true, yaml = true}
+vim.g.copilot_filetypes = {
+  markdown = true,
+  typescript = true,
+  javascript = true,
+  css = true,
+  html = true,
+  dockerfile = true,
+  java = true,
+  jsdoc = true,
+  json = true,
+  llvm = true,
+  lua = true,
+  luadoc = true,
+  make = true,
+  python = true,
+  rust = true,
+  sql = true,
+  toml = true,
+  tsx = true,
+  vim = true,
+  vimdoc = true,
+  query = true,
+  xml = true,
+  yaml = true
+}
 
 vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_keycodes = false, silent  = true })
 vim.keymap.set('i', '<M-y>', '<Plug>(copilot-accept-word)')
@@ -732,11 +758,20 @@ vim.keymap.set({ "n" }, "<LEADER>ni", require("package-info").install, { silent 
 vim.keymap.set({ "n" }, "<LEADER>np", require("package-info").change_version, { silent = true, noremap = true, desc = 'change_version' })
 
 -- Md Preview
--- Function to set bibliography path
+-- Function to set bibliography path if ref.bib exists
 local function set_bibliography_path()
-    local file_path = vim.fn.expand('%:p')
-    local file_dir = vim.fn.fnamemodify(file_path, ':h')
-    vim.g.md_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc --csl=' .. file_dir .. '/apa.csl'
+    local file_path = vim.fn.expand('%:p')  -- Get the full path of the current file
+    local file_dir = vim.fn.fnamemodify(file_path, ':h')  -- Get the directory of the current file
+    local bib_file = file_dir .. '/ref.bib'  -- Path to the bibliography file
+
+    -- Check if the bibliography file exists and is readable
+    if vim.fn.filereadable(bib_file) == 1 then
+        -- Set the bibliography path and other arguments if ref.bib exists
+        vim.g.md_args = '--bibliography=' .. bib_file .. ' --citeproc --csl=' .. file_dir .. '/apa.csl'
+    else
+        -- Optionally clear the variable or set it to a default value if ref.bib does not exist
+        vim.g.md_args = ''
+    end
 end
 
 -- Autocommand to set the bibliography path for markdown files
@@ -746,7 +781,9 @@ vim.api.nvim_create_autocmd('FileType', {
 })
 
 local preview_running = false
+local presentation_running = false
 local pdf_viewer = "zathura"
+local presentation_viewer = "zathura --mode=presentation"
 
 local function CompileSynchronous()
     local md_args = vim.g.md_args or ""
@@ -758,6 +795,15 @@ local function CompileSynchronous()
     os.execute(command)
 end
 
+local function CompilePresentation()
+  local md_args = vim.g.md_args or ""
+  local file_path = vim.fn.expand("%:p")
+  local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
+  local hyperref_options = "-V colorlinks -V linkcolor=blue -V urlcolor=red"
+  local command = "pandoc -F pandoc-crossref -t beamer " .. hyperref_options .. " " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
+
+  os.execute(command)
+end
 
 local function OpenPdf()
     if not preview_running then
@@ -773,33 +819,48 @@ local function OpenPdf()
     os.execute(pdf_viewer .. " " .. vim.fn.shellescape(pdf_path) .. " &")
 end
 
+local function OpenPresentation()
+
+  if not presentation_running then
+    return
+  end
+
+  local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
+
+  CompilePresentation()
+
+  os.execute(presentation_viewer .. " " .. vim.fn.shellescape(pdf_path) .. " &")
+end
+
 local function StartPreview()
     preview_running = true
     OpenPdf()
+end
+
+local function StartPresentation()
+  presentation_running = true
+  OpenPresentation()
 end
 
 local function StopPreview()
     preview_running = false
 end
 
+local function StopPresentation()
+  presentation_running = false
+end
+
 vim.api.nvim_create_autocmd("BufWritePost", {
-    pattern = {"*.md", "*.markdown", "*.pandoc"},
+  pattern = {"*.md", "*.markdown", "*.pandoc"},
     callback = function()
-        if preview_running then
-            CompileSynchronous()
-        end
-    end,
+      if preview_running then
+        CompileSynchronous()
+      end
+      if presentation_running then
+        CompilePresentation()
+      end
+  end,
 })
 
 vim.api.nvim_create_user_command("StartMdPreview", StartPreview, {})
 vim.api.nvim_create_user_command("StopMdPreview", StopPreview, {})
-
-
---[[ Replace with your preferred PDF viewer
-vim.g.markdown_preview_pdf_viewer = "zathura"
-
--- Since I use a bibliography file, I need to set the path to it
-local file_path = vim.fn.expand('%:p')
-local file_dir = vim.fn.fnamemodify(file_path, ':h')
-vim.g.markdown_preview_pandoc_args = '--bibliography=' .. file_dir .. '/ref.bib --citeproc'
---]]
