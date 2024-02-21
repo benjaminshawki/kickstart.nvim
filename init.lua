@@ -1,4 +1,3 @@
--- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
@@ -20,6 +19,11 @@ if not vim.loop.fs_stat(lazypath) then
   }
 end
 vim.opt.rtp:prepend(lazypath)
+
+local WINBLEND = 14
+
+vim.o.pumblend = WINBLEND
+vim.o.winblend = WINBLEND
 
 -- [[ Configure plugins ]]
 require('lazy').setup({
@@ -65,7 +69,15 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  {
+    'folke/which-key.nvim',
+    event = "VeryLazy",
+    opts = {
+      window = {
+        winblend = WINBLEND,
+      },
+    }
+  },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -235,6 +247,10 @@ require('lazy').setup({
     run = "yarn install",
     ft = { "javascript", "typescript", "css", "less", "scss", "json", "graphql", "vue", "yaml", "html" },
   },
+  "nanotee/zoxide.vim",
+  "mbbill/undotree",
+
+  -- EOF Impmorts
   -- "vim-pandoc/vim-pandoc",
   -- "vim-pandoc/vim-pandoc-syntax",
 
@@ -362,6 +378,7 @@ require('telescope').setup {
         ['<C-d>'] = false,
       },
     },
+    winblend = WINBLEND,
     layout_config = {
       width = .99,
       height = .99,
@@ -414,7 +431,7 @@ vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { d
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
+    winblend = WINBLEND,
     previewer = false,
     layout_config = {
       width = .99,
@@ -638,6 +655,10 @@ mason_lspconfig.setup_handlers {
       on_attach = on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
+      handlers = {
+        ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {winblend = WINBLEND}),
+        ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {winblend = WINBLEND}),
+      },
     }
   end,
 }
@@ -692,6 +713,13 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'path' },
+  },
+}
+
+-- Diagnostis config
+vim.diagnostic.config {
+  float = {
+    winblend = WINBLEND,
   },
 }
 
