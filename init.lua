@@ -248,6 +248,20 @@ require('lazy').setup({
   },
   "nanotee/zoxide.vim",
   "mbbill/undotree",
+  {
+    "jackMort/ChatGPT.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("chatgpt").setup()
+    end,
+    dependencies = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "folke/trouble.nvim",
+      "nvim-telescope/telescope.nvim"
+    }  },
+
+
 
   -- EOF Impmorts
   -- "vim-pandoc/vim-pandoc",
@@ -756,6 +770,16 @@ vim.g.copilot_filetypes = {
 vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_keycodes = false, silent  = true })
 vim.keymap.set('i', '<M-y>', '<Plug>(copilot-accept-word)')
 vim.g.copilot_no_tab_map = true
+
+-- Open AI ChatGPT
+require("chatgpt").setup({
+    api_key_cmd = "op read op://Personal/OpenAI/credential --no-newline"
+})
+
+-- local home = vim.fn.expand("$HOME")
+-- require("chatgpt").setup({
+--     api_key_cmd = "gpg --decrypt " .. home .. "/secret.txt.gpg"
+-- })
 
 -- spell
 vim.opt.spell = true
