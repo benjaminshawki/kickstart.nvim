@@ -248,6 +248,7 @@ require('lazy').setup({
   },
   "nanotee/zoxide.vim",
   "mbbill/undotree",
+  "editorconfig/editorconfig-vim",
   {
     "jackMort/ChatGPT.nvim",
     event = "VeryLazy",
@@ -259,7 +260,8 @@ require('lazy').setup({
       "nvim-lua/plenary.nvim",
       "folke/trouble.nvim",
       "nvim-telescope/telescope.nvim"
-    }  },
+    },
+  },
 
 
 
@@ -772,9 +774,9 @@ vim.keymap.set('i', '<M-y>', '<Plug>(copilot-accept-word)')
 vim.g.copilot_no_tab_map = true
 
 -- Open AI ChatGPT
-require("chatgpt").setup({
-    api_key_cmd = "op read op://Personal/OpenAI/credential --no-newline"
-})
+-- require("chatgpt").setup({
+--     api_key_cmd = "op read op://Personal/OpenAI/credential --no-newline"
+-- })
 
 -- local home = vim.fn.expand("$HOME")
 -- require("chatgpt").setup({
