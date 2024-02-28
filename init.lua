@@ -766,7 +766,8 @@ vim.g.copilot_filetypes = {
   vimdoc = true,
   query = true,
   xml = true,
-  yaml = true
+  yaml = true,
+  nix = true,
 }
 
 vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_keycodes = false, silent  = true })
