@@ -83,10 +83,10 @@ require('lazy').setup({
     opts = {
       -- See `:help gitsigns.txt`
       signs = {
-        add = { text = '+' },
         change = { text = '~' },
-        delete = { text = '_' },
         topdelete = { text = '‾' },
+        delete = { text = '_' },
+        add = { text = '+' },
         changedelete = { text = '~' },
       },
       on_attach = function(bufnr)
@@ -259,6 +259,15 @@ require('lazy').setup({
       "nvim-telescope/telescope.nvim"
     },
   },
+  {
+    'stevearc/aerial.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = {
+       "nvim-treesitter/nvim-treesitter",
+       "nvim-tree/nvim-web-devicons"
+    },
+  }
 
 
 
@@ -380,6 +389,17 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
+require("aerial").setup({
+  -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+  on_attach = function(bufnr)
+    -- Jump forwards/backwards with '{' and '}'
+    vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
+    vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
+  end,
+})
+-- You probably also want to set a keymap to toggle aerial
+vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>")
+
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
@@ -487,10 +507,10 @@ vim.defer_fn(function()
     incremental_selection = {
       enable = true,
       keymaps = {
-        init_selection= '<c-space>',
         node_incremental = '<c-space>',
+        init_selection= '<c-space>',
         scope_incremental = '<c-s>',
-        node_decremental = '<M-space>',
+        node_decremental = '<Esc>[32;2u',
       },
     },
     textobjects = {
@@ -530,10 +550,10 @@ vim.defer_fn(function()
       swap = {
         enable = true,
         swap_next = {
-          ['<leader>a'] = '@parameter.inner',
+          ['<leader>j'] = '@parameter.inner',
         },
         swap_previous = {
-          ['<leader>A'] = '@parameter.inner',
+          ['<leader>k'] = '@parameter.inner',
         },
       },
     },
@@ -915,4 +935,3 @@ vim.api.nvim_create_user_command("StartMdPresentation", StartPresentation, {})
 vim.api.nvim_create_user_command("StopMdPresentation", StopPresentation, {})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
