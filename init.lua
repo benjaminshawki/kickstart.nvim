@@ -1,4 +1,4 @@
--- See `:help mapleader`
+--- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
@@ -152,7 +152,13 @@ require('lazy').setup({
     },
   },
   {
+    "catppuccin/nvim",
+    "yorickpeterse/nvim-grey",
     "benjaminshawki/citruszest.nvim",
+    "NLKNguyen/papercolor-theme",
+    "yorik1984/newpaper.nvim",
+    "Verf/deepwhite.nvim",
+    "rose-pine/neovim",
     lazy = false,
     priority = 1000,
   },
@@ -163,7 +169,9 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'citruszest',
+        --theme = 'yorickpeterse/nvim-grey',
+        --theme = 'catppuccin-latte',
+        --theme = 'citruszest',
         component_separators = '|',
         section_separators = '',
       },
@@ -287,7 +295,59 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
-vim.cmd("colorscheme citruszest")
+-- Theme
+
+local function save_theme_to_file(theme)
+    local file = io.open(vim.fn.stdpath('config') .. '/.nvim_theme', 'w')
+    if file then
+        file:write(theme)
+        file:close()
+    end
+end
+
+local function load_theme_from_file()
+    local file = io.open(vim.fn.stdpath('config') .. '/.nvim_theme', 'r')
+    if file then
+        local theme = file:read("*a")
+        file:close()
+        return theme
+    end
+    return nil -- Default theme if file not found
+end
+
+local function apply_theme(theme)
+    vim.cmd("colorscheme " .. theme)
+    -- Ensure lualine is updated too, if you're using it
+    require('lualine').setup { options = { theme = theme } }
+end
+
+-- Call this function to switch themes
+local function switch_theme(theme)
+    apply_theme(theme)
+    save_theme_to_file(theme)
+end
+
+-- On Neovim startup, load the theme
+local theme = load_theme_from_file()
+if theme then
+    apply_theme(theme)
+end
+
+-- TODO: Add proper white theme. Also try a different theme bases.
+require('which-key').register({
+  ['<leader>tt'] = { name = "Themes" } -- This sets the title for the group but doesn't define individual keys here
+})
+vim.keymap.set('n', '<leader>ttc', function() switch_theme('catppuccin-latte') end, { desc = 'Switch to Catppuccin Theme' })
+vim.keymap.set('n', '<leader>ttg', function() switch_theme('grey') end, { desc = 'Switch to Nvim Grey Theme' })
+vim.keymap.set('n', '<leader>ttz', function() switch_theme('citruszest') end, { desc = 'Switch to Citruszest Theme' })
+vim.keymap.set('n', '<leader>ttp', function() switch_theme('PaperColor') end, { desc = 'Switch to Papercolor Theme' })
+vim.keymap.set('n', '<leader>ttn', function() switch_theme('newpaper') end, { desc = 'Switch to Newpaper Theme' })
+vim.keymap.set('n', '<leader>ttw', function() switch_theme('deepwhite') end, { desc = 'Switch to DeepWhite Theme' })
+vim.keymap.set('n', '<leader>ttr', function() switch_theme('rose-pine-main') end, { desc = 'Switch to Rose Pine Main Theme' })
+vim.keymap.set('n', '<leader>ttm', function() switch_theme('rose-pine-moon') end, { desc = 'Switch to Rose Pine Moon Theme' })
+vim.keymap.set('n', '<leader>ttd', function() switch_theme('rose-pine-dawn') end, { desc = 'Switch to Rose Pine Dawn Theme' })
+
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
