@@ -258,7 +258,7 @@ require('lazy').setup({
   "mbbill/undotree",
   "editorconfig/editorconfig-vim",
   {
-    "jackMort/ChatGPT.nvim",
+    "benjaminshawki/ChatGPT.nvim",
     event = "VeryLazy",
     dependencies = {
       "MunifTanjim/nui.nvim",
@@ -295,8 +295,9 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
--- Theme
+local wk = require("which-key")
 
+-- Theme
 local function save_theme_to_file(theme)
     local file = io.open(vim.fn.stdpath('config') .. '/.nvim_theme', 'w')
     if file then
@@ -333,10 +334,8 @@ if theme then
     apply_theme(theme)
 end
 
--- TODO: Add proper white theme. Also try a different theme bases.
-require('which-key').register({
-  ['<leader>tt'] = { name = "Themes" } -- This sets the title for the group but doesn't define individual keys here
-})
+-- TODO: Add proper white theme. Also try a different theme base. The colors of Citruszest are great, howe
+wk.register({["tt"] = { name = "Themes" }}, { prefix = "<leader>" })
 vim.keymap.set('n', '<leader>ttc', function() switch_theme('catppuccin-latte') end, { desc = 'Switch to Catppuccin Theme' })
 vim.keymap.set('n', '<leader>ttg', function() switch_theme('grey') end, { desc = 'Switch to Nvim Grey Theme' })
 vim.keymap.set('n', '<leader>ttz', function() switch_theme('citruszest') end, { desc = 'Switch to Citruszest Theme' })
@@ -662,7 +661,7 @@ local on_attach = function(_, bufnr)
 end
 
 -- document existing key chains
-require('which-key').register {
+wk.register {
   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
@@ -675,7 +674,7 @@ require('which-key').register {
 }
 -- register which-key VISUAL mode
 -- required for visual <leader>hs (hunk stage) to work
-require('which-key').register({
+wk.register({
   ['<leader>'] = { name = 'VISUAL <leader>' },
   ['<leader>h'] = { 'Git [H]unk' },
 }, { mode = 'v' })
@@ -854,8 +853,31 @@ vim.g.copilot_no_tab_map = true
 -- OpenAI ChatGPT
 local home = vim.fn.expand("$HOME")
 require("chatgpt").setup({
-   api_key_cmd = "gpg --decrypt " .. home .. "/secret.txt.gpg"
+  api_key_cmd = "gpg --decrypt " .. home .. "/secret.txt.gpg",
+  open_ai_params = {
+    model = "gpt-4-turbo-preview",
+  },
+  openai_edit_params = {
+    model = "gpt-4-turbo-preview",
+  },
 })
+-- ChatGPT Commands
+wk.register({["<CR>"] = { name = "ChatGPT" }}, { prefix = "<leader>" })
+vim.keymap.set({"n", "v"}, "<leader><CR><CR>", "<cmd>ChatGPT<CR>", {desc = "ChatGPT"})
+vim.keymap.set({"n", "v"}, "<leader><CR>c", "<cmd>ChatGPTCompleteCode<CR>", {desc = "Complete Code"})
+vim.keymap.set({"n", "v"}, "<leader><CR>a", "<cmd>ChatGPTActAs<CR>", {desc = "Act As"})
+vim.keymap.set({"n", "v"}, "<leader><CR>e", "<cmd>ChatGPTEditWithInstruction<CR>", {desc = "Edit with instruction"})
+vim.keymap.set({"n", "v"}, "<leader><CR>g", "<cmd>ChatGPTRun grammar_correction<CR>", {desc = "Grammar Correction"})
+vim.keymap.set({"n", "v"}, "<leader><CR>z", "<cmd>ChatGPTRun translate<CR>", {desc = "Translate"})
+vim.keymap.set({"n", "v"}, "<leader><CR>k", "<cmd>ChatGPTRun keywords<CR>", {desc = "Keywords"})
+vim.keymap.set({"n", "v"}, "<leader><CR>d", "<cmd>ChatGPTRun docstring<CR>", {desc = "Docstring"})
+vim.keymap.set({"n", "v"}, "<leader><CR>t", "<cmd>ChatGPTRun add_tests<CR>", {desc = "Add Tests"})
+vim.keymap.set({"n", "v"}, "<leader><CR>o", "<cmd>ChatGPTRun optimize_code<CR>", {desc = "Optimize Code"})
+vim.keymap.set({"n", "v"}, "<leader><CR>s", "<cmd>ChatGPTRun summarize<CR>", {desc = "Summarize"})
+vim.keymap.set({"n", "v"}, "<leader><CR>f", "<cmd>ChatGPTRun fix_bugs<CR>", {desc = "Fix Bugs"})
+vim.keymap.set({"n", "v"}, "<leader><CR>x", "<cmd>ChatGPTRun explain_code<CR>", {desc = "Explain Code"})
+vim.keymap.set({"n", "v"}, "<leader><CR>r", "<cmd>ChatGPTRun roxygen_edit<CR>", {desc = "Roxygen Edit"})
+vim.keymap.set({"n", "v"}, "<leader><CR>l", "<cmd>ChatGPTRun code_readability_analysis<CR>", {desc = "Code Readability Analysis"})
 
 -- spell
 vim.opt.spell = true
