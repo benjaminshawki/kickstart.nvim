@@ -846,9 +846,10 @@ vim.g.copilot_filetypes = {
   nix = true,
 }
 
+vim.keymap.del('i', '<Tab>')
+vim.g.copilot_no_tab_map = true
 vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_keycodes = false, silent  = true })
 vim.keymap.set('i', '<M-y>', '<Plug>(copilot-accept-word)')
-vim.g.copilot_no_tab_map = true
 
 -- OpenAI ChatGPT
 local home = vim.fn.expand("$HOME")
