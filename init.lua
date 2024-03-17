@@ -341,10 +341,9 @@ if tokyonight_ok then
       colors.bg_statusline = "#100000"
       colors.bg_float = "#100000"
       colors.bg_popup = "#100000"
-      colors.bg_visual = "#100000"
       colors.bg_sidebar = "#100000"
       colors.git = { add = "#36e32b", change = "#f3b994", delete = "#c4342d" }
-      colors.gitSigns = { add = "#A1ECA7", change = "#f3b994", delete = "#c4342d" }
+      colors.gitSigns = { add = "#36e32b", change = "#f3b994", delete = "#c4342d" }
     end
   })
 else
