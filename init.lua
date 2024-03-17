@@ -43,7 +43,7 @@ require('lazy').setup({
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -152,13 +152,7 @@ require('lazy').setup({
     },
   },
   {
-    "catppuccin/nvim",
-    "yorickpeterse/nvim-grey",
-    "benjaminshawki/citruszest.nvim",
-    "NLKNguyen/papercolor-theme",
-    "yorik1984/newpaper.nvim",
-    "Verf/deepwhite.nvim",
-    "rose-pine/neovim",
+    "folke/tokyonight.nvim",
     lazy = false,
     priority = 1000,
   },
@@ -169,9 +163,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        --theme = 'yorickpeterse/nvim-grey',
-        --theme = 'catppuccin-latte',
-        --theme = 'citruszest',
+        theme = 'tokyonight',
         component_separators = '|',
         section_separators = '',
       },
@@ -221,7 +213,7 @@ require('lazy').setup({
   'moll/vim-bbye',
   'simeji/winresizer',
 
-  { "junegunn/fzf", build = "./install --bin" },
+  { "junegunn/fzf",          build = "./install --bin" },
   'machakann/vim-sandwich',
   'wincent/ferret',
 
@@ -244,10 +236,10 @@ require('lazy').setup({
     build = function() vim.fn["mkdp#util#install"]() end,
   },
   {
-  	"vuki656/package-info.nvim",
-  	ft = "json",
-  	dependencies = "MunifTanjim/nui.nvim",
-  	opts = {},
+    "vuki656/package-info.nvim",
+    ft = "json",
+    dependencies = "MunifTanjim/nui.nvim",
+    opts = {},
   },
   {
     "prettier/vim-prettier",
@@ -272,12 +264,10 @@ require('lazy').setup({
     opts = {},
     -- Optional dependencies
     dependencies = {
-       "nvim-treesitter/nvim-treesitter",
-       "nvim-tree/nvim-web-devicons"
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons"
     },
   }
-
-
 
   -- EOF Impmorts
   -- "vim-pandoc/vim-pandoc",
@@ -285,7 +275,7 @@ require('lazy').setup({
 
   --'conornewton/vim-pandoc-markdown-preview',
   --'benjaminshawki/markdown-preview',
---   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
+  --   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
@@ -298,54 +288,84 @@ require('lazy').setup({
 local wk = require("which-key")
 
 -- Theme
-local function save_theme_to_file(theme)
-    local file = io.open(vim.fn.stdpath('config') .. '/.nvim_theme', 'w')
-    if file then
-        file:write(theme)
-        file:close()
-    end
+-- Tokyo Night theme setup with safe check
+local ThemeManager = {}
+
+function ThemeManager.saveThemeToFile(theme)
+  local filePath = vim.fn.stdpath('config') .. '/.nvim_theme'
+  local file = io.open(filePath, 'w')
+  if not file then
+    print("Failed to open file for writing.")
+    return
+  end
+  file:write(theme)
+  file:close()
 end
 
-local function load_theme_from_file()
-    local file = io.open(vim.fn.stdpath('config') .. '/.nvim_theme', 'r')
-    if file then
-        local theme = file:read("*a")
-        file:close()
-        return theme
-    end
+function ThemeManager.loadThemeFromFile()
+  local filePath = vim.fn.stdpath('config') .. '/.nvim_theme'
+  local file = io.open(filePath, 'r')
+  if not file then
     return nil -- Default theme if file not found
+  end
+  local theme = file:read("*a")
+  file:close()
+  return theme
 end
 
-local function apply_theme(theme)
-    vim.cmd("colorscheme " .. theme)
-    -- Ensure lualine is updated too, if you're using it
-    require('lualine').setup { options = { theme = theme } }
+function ThemeManager.applyTheme(theme)
+  vim.cmd("colorscheme " .. theme)
+  local lualine_ok, lualine = pcall(require, 'lualine')
+  if lualine_ok then
+    lualine.setup { options = { theme = theme } }
+  end
 end
 
--- Call this function to switch themes
-local function switch_theme(theme)
-    apply_theme(theme)
-    save_theme_to_file(theme)
+function ThemeManager.switchTheme(theme)
+  ThemeManager.applyTheme(theme)
+  ThemeManager.saveThemeToFile(theme)
+end
+
+-- Tokyo Night theme setup with safe check
+local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
+if tokyonight_ok then
+  tokyonight.setup({
+    styles = {
+      sidebars = "transparent",
+      floats = "transparent",
+    },
+    on_colors = function(colors)
+      colors.fg = "#CFCFCF"
+      colors.bg = "#000000"
+      colors.bg_dark = "#100000"
+      colors.bg_statusline = "#100000"
+      colors.bg_float = "#100000"
+      colors.bg_popup = "#100000"
+      colors.bg_visual = "#100000"
+      colors.bg_sidebar = "#100000"
+      colors.git = { add = "#36e32b", change = "#f3b994", delete = "#c4342d" }
+      colors.gitSigns = { add = "#A1ECA7", change = "#f3b994", delete = "#c4342d" }
+    end
+  })
+else
+  print("Tokyo Night theme not found. Please install it to use this configuration.")
 end
 
 -- On Neovim startup, load the theme
-local theme = load_theme_from_file()
+local theme = ThemeManager.loadThemeFromFile()
 if theme then
-    apply_theme(theme)
+  ThemeManager.applyTheme(theme)
 end
 
--- TODO: Add proper white theme. Also try a different theme base. The colors of Citruszest are great, howe
-wk.register({["tt"] = { name = "Themes" }}, { prefix = "<leader>" })
-vim.keymap.set('n', '<leader>ttc', function() switch_theme('catppuccin-latte') end, { desc = 'Switch to Catppuccin Theme' })
-vim.keymap.set('n', '<leader>ttg', function() switch_theme('grey') end, { desc = 'Switch to Nvim Grey Theme' })
-vim.keymap.set('n', '<leader>ttz', function() switch_theme('citruszest') end, { desc = 'Switch to Citruszest Theme' })
-vim.keymap.set('n', '<leader>ttp', function() switch_theme('PaperColor') end, { desc = 'Switch to Papercolor Theme' })
-vim.keymap.set('n', '<leader>ttn', function() switch_theme('newpaper') end, { desc = 'Switch to Newpaper Theme' })
-vim.keymap.set('n', '<leader>ttw', function() switch_theme('deepwhite') end, { desc = 'Switch to DeepWhite Theme' })
-vim.keymap.set('n', '<leader>ttr', function() switch_theme('rose-pine-main') end, { desc = 'Switch to Rose Pine Main Theme' })
-vim.keymap.set('n', '<leader>ttm', function() switch_theme('rose-pine-moon') end, { desc = 'Switch to Rose Pine Moon Theme' })
-vim.keymap.set('n', '<leader>ttd', function() switch_theme('rose-pine-dawn') end, { desc = 'Switch to Rose Pine Dawn Theme' })
-
+-- Key mappings for theme switching
+vim.keymap.set('n', '<leader>ttn', function() ThemeManager.switchTheme('tokyonight') end,
+  { desc = 'Switch to Tokyo Night Night Theme' })
+vim.keymap.set('n', '<leader>tts', function() ThemeManager.switchTheme('tokyonight-storm') end,
+  { desc = 'Switch to Tokyo Night Storm Theme' })
+vim.keymap.set('n', '<leader>ttd', function() ThemeManager.switchTheme('tokyonight-day') end,
+  { desc = 'Switch to Tokyo Night Day Theme' })
+vim.keymap.set('n', '<leader>ttm', function() ThemeManager.switchTheme('tokyonight-moon') end,
+  { desc = 'Switch to Tokyo Night Moon Theme' })
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -429,9 +449,9 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnos
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
-vim.api.nvim_set_keymap('n', '<leader>bn', ':bn<CR>', {noremap = true})
-vim.api.nvim_set_keymap('n', '<leader>tn', 'gt', {noremap = true})
-vim.api.nvim_set_keymap('n', '<C-w>h', '<C-w>s', {noremap = true})
+vim.api.nvim_set_keymap('n', '<leader>bn', ':bn<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader>tn', 'gt', { noremap = true })
+vim.api.nvim_set_keymap('n', '<C-w>h', '<C-w>s', { noremap = true })
 
 -- Compile and open output
 -- vim.keymap.set('n', '<leader>G', ':w! | !"$DOTFILES"/nvim/scripts/comp <c-r>%<CR><CR>')
@@ -512,15 +532,15 @@ vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect T
 vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
 vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = 'Search [G]it [F]iles' })
 vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-vim.keymap.set('n', '<leader>sh', builtin.help_tags,  { desc = '[S]earch [H]elp' })
+vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
 vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
 
-vim.api.nvim_create_user_command('LiveGrepGitRoot', function ()
--- Custom live_grep function to search in git root
+vim.api.nvim_create_user_command('LiveGrepGitRoot', function()
+  -- Custom live_grep function to search in git root
   local git_root = find_git_root()
   if git_root then
     builtin.live_grep {
@@ -542,7 +562,7 @@ vim.keymap.set('n', '<leader>/', function()
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
-vim.keymap.set('n', '<leader>s/', function ()
+vim.keymap.set('n', '<leader>s/', function()
   builtin.live_grep {
     grep_open_files = true,
     prompt_title = 'Live Grep in Open Files',
@@ -567,7 +587,7 @@ vim.defer_fn(function()
       enable = true,
       keymaps = {
         node_incremental = '<c-space>',
-        init_selection= '<c-space>',
+        init_selection = '<c-space>',
         scope_incremental = '<c-s>',
         node_decremental = '<Esc>[32;2u',
       },
@@ -701,7 +721,7 @@ local servers = {
   bashls = {},
   dockerls = {},
   cssls = {},
-  html = { filetypes = { 'html', 'twig', 'hbs'} },
+  html = { filetypes = { 'html', 'twig', 'hbs' } },
   jdtls = {},
   yamlls = {},
   jsonls = {},
@@ -711,8 +731,8 @@ local servers = {
   tailwindcss = {},
   sqlls = {},
   --grammarly = {
-    --enable = true,
-    --filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
+  --enable = true,
+  --filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
   --},
 
   lua_ls = {
@@ -747,8 +767,8 @@ mason_lspconfig.setup_handlers {
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
       handlers = {
-        ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {winblend = WINBLEND}),
-        ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {winblend = WINBLEND}),
+        ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { winblend = WINBLEND }),
+        ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { winblend = WINBLEND }),
       },
     }
   end,
@@ -846,9 +866,10 @@ vim.g.copilot_filetypes = {
   nix = true,
 }
 
+-- Copilot keymaps
 vim.keymap.del('i', '<Tab>')
 vim.g.copilot_no_tab_map = true
-vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_keycodes = false, silent  = true })
+vim.keymap.set('i', '<M-Y>', 'copilot#Accept("<CR>")', { expr = true, replace_keycodes = false, silent = true })
 vim.keymap.set('i', '<M-y>', '<Plug>(copilot-accept-word)')
 
 -- OpenAI ChatGPT
@@ -863,71 +884,78 @@ require("chatgpt").setup({
   },
 })
 -- ChatGPT Commands
-wk.register({["<CR>"] = { name = "ChatGPT" }}, { prefix = "<leader>" })
-vim.keymap.set({"n", "v"}, "<leader><CR><CR>", "<cmd>ChatGPT<CR>", {desc = "ChatGPT"})
-vim.keymap.set({"n", "v"}, "<leader><CR>c", "<cmd>ChatGPTCompleteCode<CR>", {desc = "Complete Code"})
-vim.keymap.set({"n", "v"}, "<leader><CR>a", "<cmd>ChatGPTActAs<CR>", {desc = "Act As"})
-vim.keymap.set({"n", "v"}, "<leader><CR>e", "<cmd>ChatGPTEditWithInstruction<CR>", {desc = "Edit with instruction"})
-vim.keymap.set({"n", "v"}, "<leader><CR>g", "<cmd>ChatGPTRun grammar_correction<CR>", {desc = "Grammar Correction"})
-vim.keymap.set({"n", "v"}, "<leader><CR>z", "<cmd>ChatGPTRun translate<CR>", {desc = "Translate"})
-vim.keymap.set({"n", "v"}, "<leader><CR>k", "<cmd>ChatGPTRun keywords<CR>", {desc = "Keywords"})
-vim.keymap.set({"n", "v"}, "<leader><CR>d", "<cmd>ChatGPTRun docstring<CR>", {desc = "Docstring"})
-vim.keymap.set({"n", "v"}, "<leader><CR>t", "<cmd>ChatGPTRun add_tests<CR>", {desc = "Add Tests"})
-vim.keymap.set({"n", "v"}, "<leader><CR>o", "<cmd>ChatGPTRun optimize_code<CR>", {desc = "Optimize Code"})
-vim.keymap.set({"n", "v"}, "<leader><CR>s", "<cmd>ChatGPTRun summarize<CR>", {desc = "Summarize"})
-vim.keymap.set({"n", "v"}, "<leader><CR>f", "<cmd>ChatGPTRun fix_bugs<CR>", {desc = "Fix Bugs"})
-vim.keymap.set({"n", "v"}, "<leader><CR>x", "<cmd>ChatGPTRun explain_code<CR>", {desc = "Explain Code"})
-vim.keymap.set({"n", "v"}, "<leader><CR>r", "<cmd>ChatGPTRun roxygen_edit<CR>", {desc = "Roxygen Edit"})
-vim.keymap.set({"n", "v"}, "<leader><CR>l", "<cmd>ChatGPTRun code_readability_analysis<CR>", {desc = "Code Readability Analysis"})
+wk.register({ ["<CR>"] = { name = "ChatGPT" } }, { prefix = "<leader>" })
+vim.keymap.set({ "n", "v" }, "<leader><CR><CR>", "<cmd>ChatGPT<CR>", { desc = "ChatGPT" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>c", "<cmd>ChatGPTCompleteCode<CR>", { desc = "Complete Code" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>a", "<cmd>ChatGPTActAs<CR>", { desc = "Act As" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>e", "<cmd>ChatGPTEditWithInstruction<CR>", { desc = "Edit with instruction" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>g", "<cmd>ChatGPTRun grammar_correction<CR>", { desc = "Grammar Correction" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>z", "<cmd>ChatGPTRun translate<CR>", { desc = "Translate" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>k", "<cmd>ChatGPTRun keywords<CR>", { desc = "Keywords" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>d", "<cmd>ChatGPTRun docstring<CR>", { desc = "Docstring" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>t", "<cmd>ChatGPTRun add_tests<CR>", { desc = "Add Tests" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>o", "<cmd>ChatGPTRun optimize_code<CR>", { desc = "Optimize Code" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>s", "<cmd>ChatGPTRun summarize<CR>", { desc = "Summarize" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>f", "<cmd>ChatGPTRun fix_bugs<CR>", { desc = "Fix Bugs" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>x", "<cmd>ChatGPTRun explain_code<CR>", { desc = "Explain Code" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>r", "<cmd>ChatGPTRun roxygen_edit<CR>", { desc = "Roxygen Edit" })
+vim.keymap.set({ "n", "v" }, "<leader><CR>l", "<cmd>ChatGPTRun code_readability_analysis<CR>",
+  { desc = "Code Readability Analysis" })
 
 -- spell
 vim.opt.spell = true
-vim.opt.spelllang = {'en', 'nl'}
+vim.opt.spelllang = { 'en', 'nl' }
 
--- Package Info
+-- NPM Package Info
 pcall(require("telescope").load_extension, "package_info")
--- Show dependency versions
-vim.keymap.set({ "n" }, "<LEADER>ns", require("package-info").show, { silent = true, noremap = true, desc = 'show'})
-
--- Hide dependency versions
+vim.keymap.set({ "n" }, "<LEADER>ns", require("package-info").show, { silent = true, noremap = true, desc = 'show' })
 vim.keymap.set({ "n" }, "<LEADER>nc", require("package-info").hide, { silent = true, noremap = true, desc = 'hide' })
-
--- Toggle dependency versions
 vim.keymap.set({ "n" }, "<LEADER>nt", require("package-info").toggle, { silent = true, noremap = true, desc = 'toggle' })
-
--- Update dependency on the line
 vim.keymap.set({ "n" }, "<LEADER>nu", require("package-info").update, { silent = true, noremap = true, desc = 'update' })
-
--- Delete dependency on the line
 vim.keymap.set({ "n" }, "<LEADER>nd", require("package-info").delete, { silent = true, noremap = true, desc = 'delete' })
+vim.keymap.set({ "n" }, "<LEADER>ni", require("package-info").install,
+  { silent = true, noremap = true, desc = 'install' })
+vim.keymap.set({ "n" }, "<LEADER>np", require("package-info").change_version,
+  { silent = true, noremap = true, desc = 'change_version' })
 
--- Install a new dependency
-vim.keymap.set({ "n" }, "<LEADER>ni", require("package-info").install, { silent = true, noremap = true, desc = 'install' })
+-- Rust
+-- Autoformat Rust files on save using rust_analyzer's LSP formatting capability
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = { "*.rs" },
+  callback = function()
+    vim.lsp.buf.format({ async = true })
+  end,
+})
 
--- Install a different dependency version
-vim.keymap.set({ "n" }, "<LEADER>np", require("package-info").change_version, { silent = true, noremap = true, desc = 'change_version' })
+-- Lua
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = "*.lua",
+  callback = function()
+    vim.lsp.buf.format({ timeout_ms = 1000 })
+  end,
+})
 
 -- Md Preview
 -- Function to set bibliography path if ref.bib exists
 local function set_bibliography_path()
-    local file_path = vim.fn.expand('%:p')  -- Get the full path of the current file
-    local file_dir = vim.fn.fnamemodify(file_path, ':h')  -- Get the directory of the current file
-    local bib_file = file_dir .. '/ref.bib'  -- Path to the bibliography file
+  local file_path = vim.fn.expand('%:p')               -- Get the full path of the current file
+  local file_dir = vim.fn.fnamemodify(file_path, ':h') -- Get the directory of the current file
+  local bib_file = file_dir .. '/ref.bib'              -- Path to the bibliography file
 
-    -- Check if the bibliography file exists and is readable
-    if vim.fn.filereadable(bib_file) == 1 then
-        -- Set the bibliography path and other arguments if ref.bib exists
-        vim.g.md_args = '--bibliography=' .. bib_file .. ' --citeproc --csl=' .. file_dir .. '/apa.csl'
-    else
-        -- Optionally clear the variable or set it to a default value if ref.bib does not exist
-        vim.g.md_args = ''
-    end
+  -- Check if the bibliography file exists and is readable
+  if vim.fn.filereadable(bib_file) == 1 then
+    -- Set the bibliography path and other arguments if ref.bib exists
+    vim.g.md_args = '--bibliography=' .. bib_file .. ' --citeproc --csl=' .. file_dir .. '/apa.csl'
+  else
+    -- Optionally clear the variable or set it to a default value if ref.bib does not exist
+    vim.g.md_args = ''
+  end
 end
 
 -- Autocommand to set the bibliography path for markdown files
 vim.api.nvim_create_autocmd('FileType', {
-    pattern = 'markdown',
-    callback = set_bibliography_path
+  pattern = 'markdown',
+  callback = set_bibliography_path
 })
 
 local preview_running = false
@@ -936,13 +964,15 @@ local pdf_viewer = "zathura"
 local presentation_viewer = "zathura --mode=presentation"
 
 local function CompileSynchronous()
-    local md_args = vim.g.md_args or ""
-    local file_path = vim.fn.expand("%:p")
-    local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
-    local hyperref_options = "-V colorlinks -V linkcolor=blue -V urlcolor=red"
-    local command = "pandoc -F pandoc-crossref " .. hyperref_options .. " " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
+  local md_args = vim.g.md_args or ""
+  local file_path = vim.fn.expand("%:p")
+  local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
+  local hyperref_options = "-V colorlinks -V linkcolor=blue -V urlcolor=red"
+  local command = "pandoc -F pandoc-crossref " ..
+      hyperref_options ..
+      " " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
 
-    os.execute(command)
+  os.execute(command)
 end
 
 local function CompilePresentation()
@@ -950,27 +980,28 @@ local function CompilePresentation()
   local file_path = vim.fn.expand("%:p")
   local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
   local hyperref_options = "-V colorlinks -V linkcolor=blue -V urlcolor=red"
-  local command = "pandoc -F pandoc-crossref -t beamer " .. hyperref_options .. " " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
+  local command = "pandoc -F pandoc-crossref -t beamer " ..
+      hyperref_options ..
+      " " .. md_args .. " " .. vim.fn.shellescape(file_path) .. " -o " .. vim.fn.shellescape(pdf_path)
 
   os.execute(command)
 end
 
 local function OpenPdf()
-    if not preview_running then
-        return
-    end
+  if not preview_running then
+    return
+  end
 
-    local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
+  local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
 
-    -- Compile the PDF
-    CompileSynchronous()
+  -- Compile the PDF
+  CompileSynchronous()
 
-    -- Open Zathura with the PDF
-    os.execute(pdf_viewer .. " " .. vim.fn.shellescape(pdf_path) .. " &")
+  -- Open Zathura with the PDF
+  os.execute(pdf_viewer .. " " .. vim.fn.shellescape(pdf_path) .. " &")
 end
 
 local function OpenPresentation()
-
   if not presentation_running then
     return
   end
@@ -983,8 +1014,8 @@ local function OpenPresentation()
 end
 
 local function StartPreview()
-    preview_running = true
-    OpenPdf()
+  preview_running = true
+  OpenPdf()
 end
 
 local function StartPresentation()
@@ -993,7 +1024,7 @@ local function StartPresentation()
 end
 
 local function StopPreview()
-    preview_running = false
+  preview_running = false
 end
 
 local function StopPresentation()
@@ -1001,14 +1032,14 @@ local function StopPresentation()
 end
 
 vim.api.nvim_create_autocmd("BufWritePost", {
-  pattern = {"*.md", "*.markdown", "*.pandoc"},
-    callback = function()
-      if preview_running then
-        CompileSynchronous()
-      end
-      if presentation_running then
-        CompilePresentation()
-      end
+  pattern = { "*.md", "*.markdown", "*.pandoc" },
+  callback = function()
+    if preview_running then
+      CompileSynchronous()
+    end
+    if presentation_running then
+      CompilePresentation()
+    end
   end,
 })
 
@@ -1016,5 +1047,3 @@ vim.api.nvim_create_user_command("StartMdPreview", StartPreview, {})
 vim.api.nvim_create_user_command("StopMdPreview", StopPreview, {})
 vim.api.nvim_create_user_command("StartMdPresentation", StartPresentation, {})
 vim.api.nvim_create_user_command("StopMdPresentation", StopPresentation, {})
-
--- The line beneath this is called `modeline`. See `:help modeline`
