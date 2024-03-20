@@ -267,7 +267,7 @@ require('lazy').setup({
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons"
     },
-  }
+  },
 
   -- EOF Impmorts
   -- "vim-pandoc/vim-pandoc",
@@ -729,6 +729,7 @@ local servers = {
   eslint = { cmd = { '$HOME/.volta/tools/image/packages/eslint/bin/eslint' } },
   tailwindcss = {},
   sqlls = {},
+  texlab = { filetypes = { 'latex', 'tex', 'bib', 'markdown' } },
   --grammarly = {
   --enable = true,
   --filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
