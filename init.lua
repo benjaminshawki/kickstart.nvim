@@ -411,7 +411,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
-
 -- Case-insensitive searching UNLESS \C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
@@ -567,6 +566,28 @@ vim.keymap.set('n', '<leader>s/', function()
     prompt_title = 'Live Grep in Open Files',
   }
 end, { desc = '[S]earch [/] in Open Files' })
+
+-- Define a user command that opens Telescope to find directories based on the location (git root or current)
+local function open_telescope_find_directories(use_git_root)
+  local search_root = use_git_root and find_git_root() or '.'
+  require('telescope.builtin').find_files({
+    find_command = { 'find', search_root, '-type', 'd' }
+  })
+end
+
+vim.api.nvim_create_user_command('FindFilesGitRoot', function()
+  open_telescope_find_directories(true)
+end, { desc = "Find directories from the Git root" })
+
+vim.api.nvim_create_user_command('FindFilesCurrentDir', function()
+  open_telescope_find_directories(false)
+end, { desc = "Find directories from the current directory" })
+
+-- Key mappings
+vim.api.nvim_set_keymap('n', '<leader>sm', ':FindFilesGitRoot<CR>',
+  { noremap = true, silent = true, desc = 'FZF Git root and open NETRW' })
+vim.api.nvim_set_keymap('n', '<leader>sn', ':FindFilesCurrentDir<CR>',
+  { noremap = true, silent = true, desc = 'FZF current directory and open NETRW' })
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
