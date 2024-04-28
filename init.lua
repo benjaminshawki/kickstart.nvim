@@ -268,6 +268,25 @@ require('lazy').setup({
       "nvim-tree/nvim-web-devicons"
     },
   },
+  -- {
+  -- o
+  --   "mfussenegger/nvim-jdtls",
+  -- },
+  -- {
+  --   "mfussenegger/nvim-dap",
+  --   event = "VeryLazy",
+  --   dependencies = {
+  --     {
+  --       "rcarriga/nvim-dap-ui",
+  --       "mfussenegger/nvim-dap-python",
+  --       "theHamsta/nvim-dap-virtual-text",
+  --       "nvim-telescope/telescope-dap.nvim",
+  --     },
+  --   },
+  -- },
+  -- "rcarriga/cmp-dap",
+  -- { "nvim-neotest/nvim-nio" },
+  -- "benjaminshawki/jdb.vim",
 
   -- EOF Impmorts
   -- "vim-pandoc/vim-pandoc",
@@ -399,17 +418,17 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 
 
--- Set indentation for Java files
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "java",
-  callback = function()
-    -- Set the number of spaces for each indentation
-    vim.opt_local.shiftwidth = 2
-    vim.opt_local.tabstop = 2
-    -- Use spaces instead of tabs
-    vim.opt_local.expandtab = true
-  end,
-})
+
+wk.register({
+  g = {
+    name = "+git",
+    s = { "<cmd>Git status<cr>", "Status" },
+    p = { "<cmd>Git push<cr>", "Push" },
+    l = { "<cmd>Git pull<cr>", "Pull" },
+    d = { "<cmd>Gdiff<cr>", "Diff" },
+  },
+}, { prefix = "<leader>" })
+
 
 -- Case-insensitive searching UNLESS \C or capital in search
 vim.o.ignorecase = true
@@ -475,7 +494,7 @@ require("aerial").setup({
   end,
 })
 -- You probably also want to set a keymap to toggle aerial
-vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<CR>")
+vim.keymap.set("n", "<leader>ta", "<cmd>AerialToggle!<CR>")
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
@@ -595,13 +614,39 @@ vim.api.nvim_set_keymap('n', '<leader>sn', ':FindFilesCurrentDir<CR>',
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'markdown', 'markdown_inline', 'css', 'html', 'dockerfile', 'java', 'jsdoc', 'llvm', 'make', 'sql', 'toml', 'query', 'xml', 'yaml' },
-
-
-    -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
+    ensure_installed = {
+      'c',
+      'cpp',
+      'go',
+      'lua',
+      'python',
+      'rust',
+      'tsx',
+      'javascript',
+      'typescript',
+      'vimdoc',
+      'vim',
+      'bash',
+      'markdown',
+      'markdown_inline',
+      'css',
+      'html',
+      'dockerfile',
+      'java',
+      'jsdoc',
+      'llvm',
+      'make',
+      'sql',
+      'toml',
+      'query',
+      'xml',
+      'yaml'
+    },
     auto_install = true,
-
-    highlight = { enable = true },
+    highlight = {
+      enable = true,
+      additional_vim_regex_highlighting = false,
+    },
     indent = { enable = true },
     incremental_selection = {
       enable = true,
@@ -659,6 +704,12 @@ vim.defer_fn(function()
   }
 end, 0)
 
+vim.api.nvim_create_user_command("ToggleSpell", function()
+  vim.wo.spell = not vim.wo.spell
+end, {})
+
+vim.keymap.set('n', '<leader>ts', ':ToggleSpell<CR>', { desc = "Toggle Spell Checking" })
+
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(_, bufnr)
@@ -672,6 +723,16 @@ local on_attach = function(_, bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
+  if _.server_capabilities.documentFormattingProvider then
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      group = vim.api.nvim_create_augroup("Format", { clear = true }),
+      buffer = bufnr,
+      callback = function()
+        vim.lsp.buf.format({ bufnr = bufnr })
+      end
+    })
+  end
+
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
@@ -679,8 +740,8 @@ local on_attach = function(_, bufnr)
   nmap('gr', builtin.lsp_references, '[G]oto [R]eferences')
   nmap('gI', builtin.lsp_implementations, '[G]oto [I]mplementation')
   nmap('<leader>D', builtin.lsp_type_definitions, 'Type [D]efinition')
-  nmap('<leader>ds', builtin.lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', builtin.lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+  nmap('<leader>cs', builtin.lsp_document_symbols, 'Document [S]ymbols')
+  nmap('<leader>cw', builtin.lsp_dynamic_workspace_symbols, 'Workspace [S]ymbols')
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
@@ -721,7 +782,7 @@ wk.register({
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
-require('mason').setup()
+require('mason').setup({ PATH = "prepend" })
 require('mason-lspconfig').setup()
 
 -- Enable the following language servers
@@ -742,7 +803,7 @@ local servers = {
   dockerls = {},
   cssls = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
-  jdtls = {},
+  --jdtls = {},
   yamlls = {},
   jsonls = {},
   marksman = {},
@@ -768,6 +829,7 @@ local servers = {
 
 -- Setup neovim lua configuration
 require('neodev').setup()
+
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -803,6 +865,10 @@ require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
 
 cmp.setup {
+  -- enabled = function()
+  --   return vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt"
+  --       or require("cmp_dap").is_dap_buffer()
+  -- end,
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
@@ -845,6 +911,7 @@ cmp.setup {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'path' },
+    { name = "dap" },
   },
 }
 
@@ -972,6 +1039,150 @@ local function set_bibliography_path()
     vim.g.md_args = ''
   end
 end
+
+-- Java
+-- Set indentation for Java files
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "java",
+--   callback = function()
+--     -- Set the number of spaces for each indentation
+--     vim.opt_local.shiftwidth = 2
+--     vim.opt_local.tabstop = 2
+--     -- Use spaces instead of tabs
+--     vim.opt_local.expandtab = true
+--   end,
+-- })
+
+-- Include your setup_jdtls function here or after the plugin setup block
+-- local function setup_jdtls()
+--   local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
+--   local workspace_dir = vim.fn.stdpath('data') .. '/workspace/' .. project_name
+--   local config = {
+--     cmd = { vim.fn.getenv("USER_BIN") .. '/jdtls.sh', workspace_dir }, -- Adjust as necessary
+--     root_dir = require('jdtls.setup').find_root({ '.git', 'mvnw', 'gradlew' }),
+--     -- Additional configuration
+--   }
+--
+--   require('jdtls').start_or_attach(config)
+--   require('jdtls').setup_dap({ hotcodereplace = 'auto' })
+-- end
+--
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "java",
+--   callback = setup_jdtls
+-- })
+--
+-- require('dapui').setup() -- Already present
+-- local dap = require('dap')
+--
+-- -- Example: Configure a Java debugger
+-- dap.adapters.java = {
+--   type = 'server',
+--   host = '127.0.0.1',
+--   port = 5005
+-- }
+--
+-- dap.configurations.java = {
+--   {
+--     type = 'java',
+--     request = 'attach',
+--     name = "Debug (Attach) - Remote",
+--     hostName = "127.0.0.1",
+--     port = 5005,
+--   },
+-- }
+
+-- HEREHERE
+-- local jdtls_ok, jdtls = pcall(require, "jdtls")
+-- if not jdtls_ok then
+--   vim.notify("jdtls not found, install with `:LspInstall jdtls`")
+--   return
+-- end
+
+-- local path_to_java_dap = "$HOME/java/java-debug-0.52.0/com.microsoft.java.debug.plin/target/'
+
+-- ["<leader>dp"] = { "<cmd>lua require'dap'.pause()<cr>", "Pause" },
+-- ["<leader>dr"] = { "<cmd>lua require'dap'.repl.toggle()<cr>", "Toggle Repl" },
+-- ["<leader>dq"] = { "<cmd>lua require'dap'.close()<cr>", "Quit" },
+-- ["<leader>dU"] = { "<cmd>lua require'dapui'.toggle({reset = true})<cr>", "Toggle UI" },
+--
+-- ["<leader>ds"] = { "<cmd>lua show_dap_centered_scopes()<cr>", "Show Scopes" },
+-- ["<leader>gh"] = { "<cmd>lua require'dap.ui.widgets'.hover()<cr>", "Hover" },
+-- ["<leader>gt"] = { "<cmd>lua require'dap'.toggle()<cr>", "Toggle" },
+-- ["<leader>gH"] = { "<cmd>lua require'dap.ui.widgets'.centered_float(require'dap.ui.widgets'.hover)<cr>", "Centered Hover" },
+-- ["<leader>gT"] = { "<cmd>lua require'dap.ui.widgets'.centered_float(require'dap.ui.widgets'.toggle)<cr>", "Centered Toggle" },
+-- ["<leader>gV"] = { "<cmd>lua require'dap.ui.widgets'.centered_float(require'dap.ui.widgets'.variables)<cr>", "Centered Variables" },
+-- ["<leader>gB"] = { "<cmd>lua require'dap.ui.widgets'.centered_float(require'dap.ui.widgets'.breakpoints)<cr>", "Centered Breakpoints" },
+-- ["<leader>gC"] = { "<cmd>lua require'dap.ui.widgets'.centered_float(require'dap.ui.widgets'.scopes)<cr>", "Centered Scopes" },
+-- ["<leader>gS"] = { "<cmd>lua require'dap.ui.widgets'.centered_float(require'dap.ui.widgets'.stack_trace)<cr>", "Centered Stack Trace" },
+-- ["<leader>gR"] = { "<cmd>lua require'dap'.repl.open()<cr>", "Repl Open" },
+-- ["<leader>gQ"] = { "<cmd>lua require'dap'.repl.close()<cr>", "Repl Close" },
+-- ["<leader>gI"] = { "<cmd>lua require'dap'.repl.toggle()<cr>", "Repl Toggle" },
+-- ["<leader>gD"] = { "<cmd>lua require'dap'.repl.run_last()<cr>", "Repl Run Last" },
+-- ["<leader>gE"] = { "<cmd>lua require'dap'.repl.run()<cr>", "Repl Run" },
+-- ["<leader>gF"] = { "<cmd>lua require'dap'.repl.run()<cr>", "Repl Run" },
+-- key_map('n', 'gs', ':lua show_dap_centered_scopes()<CR>')
+
+--   ["<leader>da"] = { "<cmd>lua attach_to_debug()<cr>", "Attach to Debug" },
+-- }
+
+-- function attach_to_debug()
+--   local dap = require('dap')
+--   dap.adapters.java = {
+--     type = 'server',
+--     host = '127.0.0.1',
+--     port = 5005
+--   }
+--
+--   dap.configurations.java = {
+--     {
+--       type = 'java',
+--       request = 'attach',
+--       name = "Attach to the process",
+--       hostName = 'localhost',
+--       port = '5005',
+--     },
+--   }
+--   dap.continue()
+-- end
+
+-- dap.adapters.java = {
+--   type = 'server',
+--   host = '127.0.0.1',
+--   port = 5005
+-- }
+--
+-- dap.configurations.java = {
+--   {
+--     type = 'java',
+--     request = 'attach',
+--     name = "Debug (Attach) - Remote",
+--     hostName = "127.0.0.1",
+--     port = 5005,
+--   },
+-- }
+
+--
+-- wk.register({
+--   c = {
+--     name = "+code", -- Display name in which-key
+--     j = { "<cmd>lua require('jdtls').code_action()<cr>", "Java Code Action" },
+--     o = { "<cmd>lua require('jdtls').organize_imports()<cr>", "Organize Imports" },
+--     d = { "<cmd>lua require('jdtls').test_class()<cr>", "Test Class" },
+--     t = { "<cmd>lua require('jdtls').test_nearest_method()<cr>", "Test Method" },
+--   }
+-- }, { prefix = "<leader>" })
+--
+-- wk.register({
+--   u = {
+--     name = "+ui",
+--     d = { "<cmd>lua require('dapui').toggle()<cr>", "Toggle DAP UI" },
+--     h = { "<cmd>lua require('dapui').eval()<cr>", "Evaluate" },
+--   }
+-- }, { prefix = "<leader>" })
+--
+--  MarkdownPreview
+vim.g.mkdp_browser = 'google-chrome-unstable'
 
 -- Autocommand to set the bibliography path for markdown files
 vim.api.nvim_create_autocmd('FileType', {
