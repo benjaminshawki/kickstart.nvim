@@ -268,6 +268,8 @@ require('lazy').setup({
       "nvim-tree/nvim-web-devicons"
     },
   },
+  "mfussenegger/nvim-dap",
+  "img-paste-devs/img-paste.vim",
   -- {
   -- o
   --   "mfussenegger/nvim-jdtls",
@@ -1279,3 +1281,6 @@ vim.api.nvim_create_user_command("StartMdPreview", StartPreview, {})
 vim.api.nvim_create_user_command("StopMdPreview", StopPreview, {})
 vim.api.nvim_create_user_command("StartMdPresentation", StartPresentation, {})
 vim.api.nvim_create_user_command("StopMdPresentation", StopPresentation, {})
+
+-- Screenshots from clipboard to markdown
+vim.api.nvim_set_keymap('n', '<Leader>p', ':call mdip#MarkdownClipboardImage()<CR>', { noremap = false, silent = true })
