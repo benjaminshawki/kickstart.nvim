@@ -270,6 +270,24 @@ require('lazy').setup({
   },
   "mfussenegger/nvim-dap",
   "img-paste-devs/img-paste.vim",
+  {
+    "olrtg/nvim-emmet",
+    config = function()
+      vim.keymap.set({ "n", "v" }, '<leader>xe', require('nvim-emmet').wrap_with_abbreviation)
+    end,
+  },
+  {
+    "lervag/vimtex",
+    lazy = false, -- we don't want to lazy load VimTeX
+    -- tag = "v2.15", -- uncomment to pin to a specific release
+    init = function()
+      -- VimTeX configuration goes here
+    end
+  }
+  -- {
+  --   "OmniSharp/omnisharp-vim",
+  --   event = "VeryLazy",
+  -- },
   -- {
   -- o
   --   "mfussenegger/nvim-jdtls",
@@ -621,6 +639,7 @@ vim.defer_fn(function()
       'cpp',
       'go',
       'lua',
+      'luadoc',
       'python',
       'rust',
       'tsx',
@@ -642,7 +661,37 @@ vim.defer_fn(function()
       'toml',
       'query',
       'xml',
-      'yaml'
+      'yaml',
+      'dockerfile',
+      'c_sharp',
+      'bibtex',
+      'asm',
+      'cmake',
+      'comment',
+      'csv',
+      'cuda',
+      'dot',
+      'git_config',
+      'git_rebase',
+      'gitignore',
+      'graphql',
+      'haskell',
+      'helm',
+      'http',
+      'jq',
+      'json',
+      'nix',
+      'ocaml',
+      'ocaml_interface',
+      'php',
+      'regex',
+      'scala',
+      'sql',
+      'ssh_config',
+      'tmux',
+      'tsx',
+      'vue',
+      'zig',
     },
     auto_install = true,
     highlight = {
@@ -706,6 +755,7 @@ vim.defer_fn(function()
   }
 end, 0)
 
+-- spell
 vim.api.nvim_create_user_command("ToggleSpell", function()
   vim.wo.spell = not vim.wo.spell
 end, {})
@@ -802,10 +852,9 @@ local servers = {
   rust_analyzer = {},
   tsserver = {},
   bashls = {},
-  dockerls = {},
   cssls = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
-  --jdtls = {},
+  jdtls = {},
   yamlls = {},
   jsonls = {},
   marksman = {},
@@ -814,6 +863,13 @@ local servers = {
   tailwindcss = {},
   sqlls = {},
   texlab = { filetypes = { 'latex', 'tex', 'bib', 'markdown' } },
+  emmet_language_server = { filetypes = { 'css', 'eruby', 'html', 'javascript', 'javascriptreact', 'less', 'sass', 'scss', 'pug', 'typescriptreact', 'vue' } },
+  csharp_ls = {},
+  dockerls = {},
+  docker_compose_language_service = {},
+
+  -- omnisharp = {},
+
   --grammarly = {
   --enable = true,
   --filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
@@ -857,6 +913,31 @@ mason_lspconfig.setup_handlers {
       },
     }
   end,
+
+  -- function(server_name)
+  --   local opts = {
+  --     capabilities = capabilities,
+  --     on_attach = on_attach,
+  --     settings = servers[server_name],
+  --     filetypes = (servers[server_name] or {}).filetypes,
+  --     handlers = {
+  --       ["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, { winblend = WINBLEND }),
+  --       ["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, { winblend = WINBLEND }),
+  --     },
+  --   }
+  --
+  --   if server_name == 'omnisharp' then
+  --     opts.cmd = { "dotnet", vim.fn.stdpath("data") .. "/mason/packages/omnisharp/libexec/OmniSharp.dll" }
+  --     opts.root_dir = function()
+  --       return vim.loop.cwd()
+  --     end
+  --     opts.enable_import_completion = true
+  --     opts.organize_imports_on_format = true
+  --     opts.enable_roslyn_analyzers = true
+  --   end
+  --
+  --   require('lspconfig')[server_name].setup(opts)
+  -- end,
 }
 
 -- [[ Configure nvim-cmp ]]
