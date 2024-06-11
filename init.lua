@@ -268,7 +268,6 @@ require('lazy').setup({
       "nvim-tree/nvim-web-devicons"
     },
   },
-  "mfussenegger/nvim-dap",
   "img-paste-devs/img-paste.vim",
   {
     "olrtg/nvim-emmet",
@@ -283,7 +282,136 @@ require('lazy').setup({
     init = function()
       -- VimTeX configuration goes here
     end
+  },
+  {
+    "scalameta/nvim-metals",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      {
+        "j-hui/fidget.nvim",
+        opts = {},
+      },
+      {
+        "mfussenegger/nvim-dap",
+        config = function(self, opts)
+          -- Debug settings if you're using nvim-dap
+          local dap = require("dap")
+
+          dap.configurations.scala = {
+            {
+              type = "scala",
+              request = "launch",
+              name = "RunOrTest",
+              metals = {
+                runType = "runOrTestFile",
+                --args = { "firstArg", "secondArg", "thirdArg" }, -- here just as an example
+              },
+            },
+            {
+              type = "scala",
+              request = "launch",
+              name = "Test Target",
+              metals = {
+                runType = "testTarget",
+              },
+            },
+          }
+        end
+      },
+    },
+    ft = { "scala", "sbt", "java" },
+    opts = function()
+      local metals_config = require("metals").bare_config()
+
+      -- Example of settings
+      metals_config.settings = {
+        showImplicitArguments = true,
+        excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+      }
+
+      -- vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
+      -- *READ THIS*
+      -- I *highly* recommend setting statusBarProvider to either "off" or "on"
+      --
+      -- "off" will enable LSP progress notifications by Metals and you'll need
+      -- to ensure you have a plugin like fidget.nvim installed to handle them.
+      --
+      -- "on" will enable the custom Metals status extension and you *have* to have
+      -- a have settings to capture this in your statusline or else you'll not see
+      -- any messages from metals. There is more info in the help docs about this
+      metals_config.init_options.statusBarProvider = "off"
+
+      -- Example if you are using cmp how to make sure the correct capabilities for snippets are set
+      metals_config.capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+      metals_config.on_attach = function(client, bufnr)
+        require("metals").setup_dap()
+
+        vim.keymap.set('n', '<leader>f', vim.lsp.buf.format, { desc = 'Fromat' })
+        vim.keymap.set("n", "<leader>ws", function()
+          require("metals").hover_worksheet()
+        end)
+
+        -- all workspace diagnostics
+        vim.keymap.set("n", "<leader>qa", vim.diagnostic.setqflist)
+
+        -- all workspace errors
+        vim.keymap.set("n", "<leader>qe", function()
+          vim.diagnostic.setqflist({ severity = "E" })
+        end)
+
+        -- all workspace warnings
+        vim.keymap.set("n", "<leader>qw", function()
+          vim.diagnostic.setqflist({ severity = "W" })
+        end)
+
+        -- Example mappings for usage with nvim-dap. If you don't use that, you can
+        -- skip these
+        --   map("n", "<leader>dc", function()
+        --     require("dap").continue()
+        --   end)
+        --
+        --   map("n", "<leader>dr", function()
+        --     require("dap").repl.toggle()
+        --   end)
+        --
+        --   map("n", "<leader>dK", function()
+        --     require("dap.ui.widgets").hover()
+        --   end)
+        --
+        --   map("n", "<leader>dt", function()
+        --     require("dap").toggle_breakpoint()
+        --   end)
+        --
+        --   map("n", "<leader>dso", function()
+        --     require("dap").step_over()
+        --   end)
+        --
+        --   map("n", "<leader>dsi", function()
+        --     require("dap").step_into()
+        --   end)
+        --
+        --   map("n", "<leader>dl", function()
+        --     require("dap").run_last()
+        --   end)
+      end
+
+      return metals_config
+    end,
+    config = function(self, metals_config)
+      local nvim_metals_group = vim.api.nvim_create_augroup("nvim-metals", { clear = true })
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = self.ft,
+        callback = function()
+          require("metals").initialize_or_attach(metals_config)
+        end,
+        group = nvim_metals_group,
+      })
+    end
   }
+
+
+
   -- {
   --   "OmniSharp/omnisharp-vim",
   --   event = "VeryLazy",
@@ -462,7 +590,7 @@ vim.o.updatetime = 250
 vim.o.timeoutlen = 300
 
 -- Set completeopt to have a better completion experience
-vim.o.completeopt = 'menuone,noselect'
+vim.o.completeopt = 'menuone,noinsert,noselect'
 
 vim.o.termguicolors = true
 
@@ -484,7 +612,7 @@ vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = tr
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+vim.keymap.set('n', '<leader>qq', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
 
 vim.api.nvim_set_keymap('n', '<leader>bn', ':bn<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<leader>tn', 'gt', { noremap = true })
@@ -887,7 +1015,6 @@ local servers = {
 
 -- Setup neovim lua configuration
 require('neodev').setup()
-
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
