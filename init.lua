@@ -1,8 +1,10 @@
---- See `:help mapleader`
+-- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.o.showbreak = '↪ ' -- Sets a string to be shown before lines that have been soft-wrapped
+
+vim.g.netrw_localcopycmd = 'cp'
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -75,7 +77,10 @@ require('lazy').setup({
       window = {
         winblend = WINBLEND,
       },
-    }
+    },
+    dependencies = {
+      "echasnovski/mini.icons"
+    },
   },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
@@ -260,6 +265,24 @@ require('lazy').setup({
     },
   },
   {
+    "benjaminshawki/nvim-random-id",
+    config = function()
+      require('nvim-random-id').setup()
+    end,
+  },
+  -- {
+  --   dir = vim.fn.expand("$HOME/workspace/nvim-random-id"),
+  --   config = function()
+  --     require('nvim-random-id').setup()
+  --   end,
+  -- },
+  {
+    -- "benjaminshawki/nvim-random-id",
+    -- config = function()
+    --   vim.keymap.set({ "n" }, '<leader>cg', ':lua add_key_value_pair()<CR>')
+    -- end
+  },
+  {
     'stevearc/aerial.nvim',
     opts = {},
     -- Optional dependencies
@@ -319,7 +342,7 @@ require('lazy').setup({
         end
       },
     },
-    ft = { "scala", "sbt", "java" },
+    ft = { "scala", "sbt" },
     opts = function()
       local metals_config = require("metals").bare_config()
 
@@ -408,7 +431,9 @@ require('lazy').setup({
         group = nvim_metals_group,
       })
     end
-  }
+  },
+
+
 
 
 
@@ -1233,22 +1258,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
--- Md Preview
--- Function to set bibliography path if ref.bib exists
-local function set_bibliography_path()
-  local file_path = vim.fn.expand('%:p')               -- Get the full path of the current file
-  local file_dir = vim.fn.fnamemodify(file_path, ':h') -- Get the directory of the current file
-  local bib_file = file_dir .. '/ref.bib'              -- Path to the bibliography file
 
-  -- Check if the bibliography file exists and is readable
-  if vim.fn.filereadable(bib_file) == 1 then
-    -- Set the bibliography path and other arguments if ref.bib exists
-    vim.g.md_args = '--bibliography=' .. bib_file .. ' --citeproc --csl=' .. file_dir .. '/apa.csl'
-  else
-    -- Optionally clear the variable or set it to a default value if ref.bib does not exist
-    vim.g.md_args = ''
-  end
-end
 
 -- Java
 -- Set indentation for Java files
@@ -1393,6 +1403,23 @@ end
 --
 --  MarkdownPreview
 vim.g.mkdp_browser = 'google-chrome-unstable'
+
+-- Md Preview
+-- Function to set bibliography path if ref.bib exists
+local function set_bibliography_path()
+  local file_path = vim.fn.expand('%:p')               -- Get the full path of the current file
+  local file_dir = vim.fn.fnamemodify(file_path, ':h') -- Get the directory of the current file
+  local bib_file = file_dir .. '/ref.bib'              -- Path to the bibliography file
+
+  -- Check if the bibliography file exists and is readable
+  if vim.fn.filereadable(bib_file) == 1 then
+    -- Set the bibliography path and other arguments if ref.bib exists
+    vim.g.md_args = '--bibliography=' .. bib_file .. ' --citeproc --csl=' .. file_dir .. '/apa.csl'
+  else
+    -- Optionally clear the variable or set it to a default value if ref.bib does not exist
+    vim.g.md_args = ''
+  end
+end
 
 -- Autocommand to set the bibliography path for markdown files
 vim.api.nvim_create_autocmd('FileType', {
