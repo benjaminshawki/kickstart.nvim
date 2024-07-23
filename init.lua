@@ -4,8 +4,6 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.o.showbreak = '↪ ' -- Sets a string to be shown before lines that have been soft-wrapped
 
-vim.g.netrw_localcopycmd = 'cp'
-
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -66,6 +64,7 @@ require('lazy').setup({
 
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
+      "mlaursen/vim-react-snippets",
     },
   },
 
@@ -244,7 +243,7 @@ require('lazy').setup({
   {
     "prettier/vim-prettier",
     run = "yarn install",
-    ft = { "javascript", "typescript", "css", "less", "scss", "json", "graphql", "vue", "yaml", "html" },
+    ft = { "javascript", "typescript", "typescriptreact", "javascriptreact", "mjs", "mts", "css", "less", "scss", "json", "graphql", "vue", "yaml", "html" },
   },
   "nanotee/zoxide.vim",
   "mbbill/undotree",
@@ -1097,6 +1096,7 @@ mason_lspconfig.setup_handlers {
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
 local cmp = require 'cmp'
+require("vim-react-snippets").lazy_load()
 local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
