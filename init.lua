@@ -843,6 +843,12 @@ vim.defer_fn(function()
       enable = true,
       additional_vim_regex_highlighting = false,
     },
+    injections = {
+      typescript = {
+        -- Path to your custom injections query file
+        injections = vim.fn.stdpath('config') .. '/queries/typescript/injections.scm'
+      }
+    },
     indent = { enable = true },
     incremental_selection = {
       enable = true,
@@ -899,6 +905,10 @@ vim.defer_fn(function()
     },
   }
 end, 0)
+
+vim.treesitter.query.set("typescript", "injections",
+  "(comment) @gql_comment (#eq? @gql_comment \"/* GraphQL */\") (template_string) @graphql")
+
 
 -- spell
 vim.api.nvim_create_user_command("ToggleSpell", function()
@@ -1021,13 +1031,14 @@ local servers = {
   csharp_ls = {},
   dockerls = {},
   docker_compose_language_service = {},
+  awk_ls = {},
 
   -- omnisharp = {},
 
-  --grammarly = {
-  --enable = true,
-  --filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
-  --},
+  -- grammarly = {
+  --   enable = true,
+  --   filetypes = { 'markdown', 'text', 'gitcommit', 'gitrebase' },
+  -- },
 
   lua_ls = {
     Lua = {
@@ -1406,7 +1417,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 -- }, { prefix = "<leader>" })
 --
 --  MarkdownPreview
-vim.g.mkdp_browser = 'google-chrome-unstable'
+vim.g.mkdp_browser = 'firefox-developer-edition'
 
 -- Md Preview
 -- Function to set bibliography path if ref.bib exists
