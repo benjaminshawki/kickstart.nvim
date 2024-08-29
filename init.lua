@@ -154,6 +154,7 @@ require('lazy').setup({
     "folke/tokyonight.nvim",
     lazy = false,
     priority = 1000,
+    opts = {}
   },
   {
     -- Set lualine as statusline
@@ -299,6 +300,11 @@ require('lazy').setup({
     init = function()
       -- VimTeX configuration goes here
     end
+  },
+  {
+    "pmizio/typescript-tools.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+    opts = {},
   },
   {
     "scalameta/nvim-metals",
@@ -543,7 +549,7 @@ if theme then
 end
 
 -- Key mappings for theme switching
-vim.keymap.set('n', '<leader>ttn', function() ThemeManager.switchTheme('tokyonight') end,
+vim.keymap.set('n', '<leader>ttn', function() ThemeManager.switchTheme('tokyonight-night') end,
   { desc = 'Switch to Tokyo Night Night Theme' })
 vim.keymap.set('n', '<leader>tts', function() ThemeManager.switchTheme('tokyonight-storm') end,
   { desc = 'Switch to Tokyo Night Storm Theme' })
@@ -618,8 +624,13 @@ vim.o.termguicolors = true
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set({ 'n', 'v' }, '<Leader>h', '<Nop>', { silent = true })
 vim.keymap.set({ 'n', 'v' }, '<Leader>j', '<Nop>', { silent = true })
-vim.keymap.set({ 'n', 'v' }, '<Leader>k', '<Nop>', { silent = true })
+vim.keymap.set({ 'n', 'v' }, '<Nop>', '<Leader>k', { silent = true })
 vim.keymap.set({ 'n', 'v' }, '<Leader>l', '<Nop>', { silent = true })
+
+vim.keymap.del('n', '<Leader>h')
+vim.keymap.del('n', '<Leader>j')
+vim.keymap.del('n', '<Leader>k')
+vim.keymap.del('n', '<Leader>l')
 
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -843,12 +854,6 @@ vim.defer_fn(function()
       enable = true,
       additional_vim_regex_highlighting = false,
     },
-    injections = {
-      typescript = {
-        -- Path to your custom injections query file
-        injections = vim.fn.stdpath('config') .. '/queries/typescript/injections.scm'
-      }
-    },
     indent = { enable = true },
     incremental_selection = {
       enable = true,
@@ -905,10 +910,6 @@ vim.defer_fn(function()
     },
   }
 end, 0)
-
-vim.treesitter.query.set("typescript", "injections",
-  "(comment) @gql_comment (#eq? @gql_comment \"/* GraphQL */\") (template_string) @graphql")
-
 
 -- spell
 vim.api.nvim_create_user_command("ToggleSpell", function()
@@ -995,6 +996,9 @@ wk.add({
   { "<leader>",  group = "VISUAL <leader>", mode = "v" },
   { "<leader>h", desc = "Git [H]unk",       mode = "v" },
 })
+
+-- Key map for TSTools
+vim.api.nvim_set_keymap('n', '<leader>rf', ':TSToolsRenameFile<CR>', { noremap = true, silent = true })
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
