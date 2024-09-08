@@ -1027,7 +1027,7 @@ local servers = {
   jsonls = {},
   marksman = {},
   graphql = {},
-  eslint = { cmd = { '$HOME/.volta/tools/image/packages/eslint/bin/eslint' } },
+  eslint = {},
   tailwindcss = {},
   sqlls = {},
   texlab = { filetypes = { 'latex', 'tex', 'bib', 'markdown' } },
