@@ -299,6 +299,13 @@ require('lazy').setup({
     -- tag = "v2.15", -- uncomment to pin to a specific release
     init = function()
       -- VimTeX configuration goes here
+      vim.g.vimtex_view_method = "zathura"
+      vim.g.vimtex_compiler_latexmk = {
+        build_dir = 'build',
+        options = {
+          '-pdf', '-interaction=nonstopmode', '-synctex=1', '-shell-escape',
+        },
+      }
     end
   },
   {
@@ -821,6 +828,7 @@ vim.defer_fn(function()
       'dockerfile',
       'c_sharp',
       'bibtex',
+      'latex',
       'asm',
       'cmake',
       'comment',
@@ -852,6 +860,7 @@ vim.defer_fn(function()
     auto_install = true,
     highlight = {
       enable = true,
+      disable = { "latex" },
       additional_vim_regex_highlighting = false,
     },
     indent = { enable = true },
@@ -910,6 +919,8 @@ vim.defer_fn(function()
     },
   }
 end, 0)
+
+
 
 -- spell
 vim.api.nvim_create_user_command("ToggleSpell", function()
@@ -1000,6 +1011,14 @@ wk.add({
 -- Key map for TSTools
 vim.api.nvim_set_keymap('n', '<leader>rf', ':TSToolsRenameFile<CR>', { noremap = true, silent = true })
 
+-- TeXLab setup
+require('lspconfig').texlab.setup {
+  filetypes = { "tex", "latex", "bib", "markdown" },
+  on_attach = on_attach, -- Assuming you defined 'on_attach' in your LSP setup
+}
+
+vim.g.tex_flavor = 'latex'
+
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require('mason').setup({ PATH = "prepend" })
@@ -1014,12 +1033,13 @@ require('mason-lspconfig').setup()
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
+  asm_lsp = {},
   clangd = {},
   gopls = {},
   pyright = {},
   rust_analyzer = {},
-  tsserver = {},
   bashls = {},
+  ts_ls = {},
   cssls = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
   jdtls = {},
@@ -1180,6 +1200,7 @@ vim.g["prettier#autoformat_require_pragma"] = 0
 
 -- copilot
 vim.g.copilot_filetypes = {
+  assembly = true,
   markdown = true,
   typescript = true,
   javascript = true,
@@ -1193,6 +1214,9 @@ vim.g.copilot_filetypes = {
   lua = true,
   luadoc = true,
   make = true,
+  tex = true,
+  plaintex = true,
+  latex = true,
   python = true,
   rust = true,
   sql = true,
@@ -1205,6 +1229,8 @@ vim.g.copilot_filetypes = {
   yaml = true,
   nix = true,
 }
+
+vim.g.copilot_debug = true
 
 -- Copilot keymaps
 vim.keymap.del('i', '<Tab>')
@@ -1535,6 +1561,55 @@ vim.api.nvim_create_user_command("StartMdPreview", StartPreview, {})
 vim.api.nvim_create_user_command("StopMdPreview", StopPreview, {})
 vim.api.nvim_create_user_command("StartMdPresentation", StartPresentation, {})
 vim.api.nvim_create_user_command("StopMdPresentation", StopPresentation, {})
+
+-- Latex preview
+local latex_preview_running = false
+
+local function CompileLatex()
+  local file_path = vim.fn.expand("%:p") -- Full path of the LaTeX file
+  local command = "latexmk -pdf -interaction=nonstopmode -synctex=1 " ..
+      vim.fn.shellescape(file_path) .. " > /dev/null 2>&1"
+
+  os.execute(command) -- Execute LaTeX compilation and suppress output
+end
+
+
+local function OpenLatexPdf()
+  if not latex_preview_running then
+    return
+  end
+
+  local pdf_path = vim.fn.expand("%:p:r") .. ".pdf"
+
+  -- Compile the LaTeX file to PDF
+  CompileLatex()
+
+  -- Open the PDF with zathura or your preferred viewer
+  os.execute(pdf_viewer .. " " .. vim.fn.shellescape(pdf_path) .. " &")
+end
+
+local function StartLatexPreview()
+  latex_preview_running = true
+  OpenLatexPdf()
+end
+
+local function StopLatexPreview()
+  latex_preview_running = false
+end
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = { "*.tex" }, -- Trigger on LaTeX files
+  callback = function()
+    if latex_preview_running then
+      CompileLatex()
+    end
+  end,
+})
+
+-- Create commands for starting and stopping LaTeX preview
+vim.api.nvim_create_user_command("StartLatexPreview", StartLatexPreview, {})
+vim.api.nvim_create_user_command("StopLatexPreview", StopLatexPreview, {})
+
 
 -- Screenshots from clipboard to markdown
 vim.api.nvim_set_keymap('n', '<Leader>p', ':call mdip#MarkdownClipboardImage()<CR>', { noremap = false, silent = true })
