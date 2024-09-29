@@ -974,6 +974,8 @@ local on_attach = function(_, bufnr)
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, '[W]orkspace [L]ist Folders')
 
+  vim.keymap.set('n', '<leader>f', vim.lsp.buf.format, { buffer = bufnr, desc = 'Format code' })
+
   -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
@@ -1050,6 +1052,8 @@ local servers = {
   eslint = {},
   tailwindcss = {},
   sqlls = {},
+  -- hdl_checker = {},
+  vhdl_ls = {},
   texlab = { filetypes = { 'latex', 'tex', 'bib', 'markdown' } },
   emmet_language_server = { filetypes = { 'css', 'eruby', 'html', 'javascript', 'javascriptreact', 'less', 'sass', 'scss', 'pug', 'typescriptreact', 'vue' } },
   csharp_ls = {},
@@ -1072,6 +1076,35 @@ local servers = {
       -- diagnostics = { disable = { 'missing-fields' } },
     },
   },
+}
+
+
+-- nvim-cmp supports additional completion capabilities, so broadcast that to servers
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+
+-- Setup clangd
+require('lspconfig').clangd.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  cmd = {
+    "clangd",
+    "--target=arm-none-eabi",
+    "--sysroot=/usr/arm-none-eabi",
+    "--query-driver=/usr/bin/arm-none-eabi-*",
+  },
+  root_dir = require('lspconfig').util.root_pattern('compile_commands.json', '.clangd', '.git') or vim.loop.cwd(),
+}
+
+-- Setup VHDL LS
+require 'lspconfig'.vhdl_ls.setup {
+  cmd = { "vhdl_ls" },    -- Ensure vhdl_ls is installed and in PATH
+  root_dir = function(fname)
+    return vim.loop.cwd() -- Set root directory to the current working directory
+  end,
+  on_attach = function(client)
+    print("VHDL LS attached to " .. client.name)
+  end,
 }
 
 -- Setup neovim lua configuration
@@ -1447,7 +1480,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 -- }, { prefix = "<leader>" })
 --
 --  MarkdownPreview
-vim.g.mkdp_browser = 'firefox-developer-edition'
+vim.g.mkdp_browser = 'google-chrome-stable'
 
 -- Md Preview
 -- Function to set bibliography path if ref.bib exists
