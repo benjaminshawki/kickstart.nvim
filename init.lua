@@ -1042,7 +1042,6 @@ local servers = {
   rust_analyzer = {},
   bashls = {},
   ts_ls = {},
-  cssls = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
   jdtls = {},
   yamlls = {},
@@ -1076,35 +1075,6 @@ local servers = {
       -- diagnostics = { disable = { 'missing-fields' } },
     },
   },
-}
-
-
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-
--- Setup clangd
-require('lspconfig').clangd.setup {
-  on_attach = on_attach,
-  capabilities = capabilities,
-  cmd = {
-    "clangd",
-    "--target=arm-none-eabi",
-    "--sysroot=/usr/arm-none-eabi",
-    "--query-driver=/usr/bin/arm-none-eabi-*",
-  },
-  root_dir = require('lspconfig').util.root_pattern('compile_commands.json', '.clangd', '.git') or vim.loop.cwd(),
-}
-
--- Setup VHDL LS
-require 'lspconfig'.vhdl_ls.setup {
-  cmd = { "vhdl_ls" },    -- Ensure vhdl_ls is installed and in PATH
-  root_dir = function(fname)
-    return vim.loop.cwd() -- Set root directory to the current working directory
-  end,
-  on_attach = function(client)
-    print("VHDL LS attached to " .. client.name)
-  end,
 }
 
 -- Setup neovim lua configuration
@@ -1160,6 +1130,38 @@ mason_lspconfig.setup_handlers {
   --   require('lspconfig')[server_name].setup(opts)
   -- end,
 }
+
+-- Define capabilities for clangd separately
+local clangd_capabilities = vim.lsp.protocol.make_client_capabilities()
+clangd_capabilities = require('cmp_nvim_lsp').default_capabilities(clangd_capabilities)
+clangd_capabilities.offsetEncoding = { "utf-8" }
+
+-- Setup clangd with specific capabilities and initializationOptions
+require('lspconfig').clangd.setup {
+  on_attach = on_attach,
+  capabilities = clangd_capabilities,
+  cmd = { "clangd" },
+  root_dir = require('lspconfig').util.root_pattern('compile_commands.json', '.clangd', '.git') or vim.loop.cwd(),
+  init_options = {
+    fallbackFlags = {
+      "--target=arm-none-eabi",
+      "--sysroot=/usr/arm-none-eabi",
+      "--query-driver=/usr/bin/arm-none-eabi-*",
+    },
+  },
+}
+
+-- Setup VHDL LS
+require 'lspconfig'.vhdl_ls.setup {
+  cmd = { "vhdl_ls" },    -- Ensure vhdl_ls is installed and in PATH
+  root_dir = function(fname)
+    return vim.loop.cwd() -- Set root directory to the current working directory
+  end,
+  on_attach = function(client)
+    print("VHDL LS attached to " .. client.name)
+  end,
+}
+
 
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
