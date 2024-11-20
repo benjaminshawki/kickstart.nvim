@@ -650,8 +650,6 @@ vim.o.undoreload = 10000
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 
-
-
 wk.add({
 	{ "<leader>g",  group = "git" },
 	{ "<leader>gd", "<cmd>Gdiff<cr>",      desc = "Diff" },
@@ -1259,6 +1257,7 @@ local cmp = require 'cmp'
 require("vim-react-snippets").lazy_load()
 local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
+require("luasnip.loaders.from_lua").lazy_load({ paths = "$HOME/.config/nvim/lua/custom/snippets" })
 luasnip.config.setup {}
 
 cmp.setup {
@@ -1319,6 +1318,8 @@ vim.diagnostic.config {
 	},
 }
 
+-- disable perl
+vim.g.loaded_perl_provider = 0
 -- Prettier
 vim.g["prettier#autoformat"] = 1
 vim.g["prettier#autoformat_require_pragma"] = 0
