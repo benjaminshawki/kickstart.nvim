@@ -149,7 +149,7 @@ require('lazy').setup({
 
 				-- Toggles
 				map('n', '<leader>tb', gs.toggle_current_line_blame, { desc = 'toggle git blame line' })
-				map('n', '<leader>td', gs.toggle_deleted, { desc = 'toggle git show deleted' })
+				map('n', '<leader>t<Del>', gs.toggle_deleted, { desc = 'toggle git show deleted' })
 
 				-- Text object
 				map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git hunk' })
@@ -1017,6 +1017,14 @@ vim.api.nvim_create_user_command("ToggleSpell", function()
 end, {})
 
 vim.keymap.set('n', '<leader>ts', ':ToggleSpell<CR>', { desc = "Toggle Spell Checking" })
+
+vim.keymap.set('n', '<leader>td', function()
+	if vim.diagnostic.is_enabled() then
+		vim.diagnostic.enable(false)
+	else
+		vim.diagnostic.enable()
+	end
+end, { desc = "Toggle Diagnostics" })
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
