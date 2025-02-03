@@ -207,7 +207,9 @@ require('lazy').setup({
 			},
 		},
 	},
-
+	{
+		"artemave/workspace-diagnostics.nvim",
+	},
 	{
 		-- Highlight, edit, and navigate code
 		'nvim-treesitter/nvim-treesitter',
@@ -264,6 +266,43 @@ require('lazy').setup({
 			"nvim-lua/plenary.nvim",
 			"folke/trouble.nvim",
 			"nvim-telescope/telescope.nvim"
+		},
+	},
+	{
+		"folke/trouble.nvim",
+		opts = {}, -- for default options, refer to the configuration section for custom setup.
+		cmd = "Trouble",
+		keys = {
+			{
+				"<leader>xx",
+				"<cmd>Trouble diagnostics toggle<cr>",
+				desc = "Diagnostics (Trouble)",
+			},
+			{
+				"<leader>xX",
+				"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+				desc = "Buffer Diagnostics (Trouble)",
+			},
+			{
+				"<leader>ty",
+				"<cmd>Trouble symbols toggle focus=false<cr>",
+				desc = "Symbols (Trouble)",
+			},
+			{
+				"<leader>tl",
+				"<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+				desc = "LSP Definitions / references / ... (Trouble)",
+			},
+			{
+				"<leader>xL",
+				"<cmd>Trouble loclist toggle<cr>",
+				desc = "Location List (Trouble)",
+			},
+			{
+				"<leader>xQ",
+				"<cmd>Trouble qflist toggle<cr>",
+				desc = "Quickfix List (Trouble)",
+			},
 		},
 	},
 	{
@@ -1028,7 +1067,7 @@ end, { desc = "Toggle Diagnostics" })
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
+local on_attach = function(client, bufnr)
 	-- In this case, we create a function that lets us more easily define mappings specific
 	-- for LSP related items. It sets the mode, buffer and description for us each time.
 	local nmap = function(keys, func, desc)
@@ -1039,7 +1078,7 @@ local on_attach = function(_, bufnr)
 		vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
 	end
 
-	if _.server_capabilities.documentFormattingProvider then
+	if client.server_capabilities.documentFormattingProvider then
 		vim.api.nvim_create_autocmd("BufWritePre", {
 			group = vim.api.nvim_create_augroup("Format", { clear = true }),
 			buffer = bufnr,
@@ -1048,6 +1087,8 @@ local on_attach = function(_, bufnr)
 			end
 		})
 	end
+
+	require("workspace-diagnostics").populate_workspace_diagnostics(client, bufnr)
 
 	nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
 	nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
@@ -1110,6 +1151,13 @@ wk.add({
 -- Key map for TSTools
 vim.api.nvim_set_keymap('n', '<leader>rf', ':TSToolsRenameFile<CR>', { noremap = true, silent = true })
 
+require("workspace-diagnostics").setup({
+	workspace_files = function()
+		return vim.fn.systemlist("git ls-files")
+	end,
+})
+
+
 -- TeXLab setup
 require('lspconfig').texlab.setup {
 	filetypes = { "tex", "latex", "bib", "markdown" },
@@ -1138,7 +1186,7 @@ local servers = {
 	pyright = {},
 	rust_analyzer = {},
 	bashls = {},
-	ts_ls = {},
+	-- ts_ls = {},
 	html = { filetypes = { 'html', 'twig', 'hbs' } },
 	jdtls = {},
 	yamlls = {},
@@ -1227,6 +1275,13 @@ mason_lspconfig.setup_handlers {
 	--   require('lspconfig')[server_name].setup(opts)
 	-- end,
 }
+
+-- require('lspconfig').ts_ls.setup({
+-- 	on_attach = function(client, bufnr)
+-- 		require("workspace-diagnostics").populate_workspace_diagnostics(client, bufnr)
+-- 	end
+-- })
+
 
 -- Define capabilities for clangd separately
 local clangd_capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -1432,6 +1487,8 @@ vim.keymap.set({ "n" }, "<LEADER>np", require("package-info").change_version,
 --     vim.lsp.buf.format({ async = true })
 --   end,
 -- })
+--
+--
 
 -- Lua
 vim.api.nvim_create_autocmd("BufWritePre", {
@@ -1457,6 +1514,27 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+
+
+-- require("workspace-diagnostics").setup({
+-- 	workspace_files = function()             -- Customize this function to return project files.
+-- 		return vim.fn.systemlist("git ls-files") -- Example to get files from Git.
+-- 	end,
+-- 	-- Add any other configuration options as needed.
+-- })
+--
+-- ---------------------------------------------------------------------------
+-- --- Key Mappings
+--
+-- vim.api.nvim_set_keymap('n', '<space>xd', '', {
+-- 	noremap = true,
+-- 	callback = function()
+-- 		for _, client in ipairs(vim.lsp.get_clients()) do
+-- 			require("workspace-diagnostics").populate_workspace_diagnostics(client, 0)
+-- 		end
+-- 	end,
+-- 	desc = "Populate workspace diagnostics"
+-- })
 
 -- Java
 -- Set indentation for Java files
