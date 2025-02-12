@@ -1166,6 +1166,13 @@ require('lspconfig').texlab.setup {
 
 vim.g.tex_flavor = 'latex'
 
+-- require('lspconfig').eslint.setup {
+-- 	cmd = { "node_modules/.bin/eslint", "--stdin" },
+-- 	filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
+-- 	root_dir = require('lspconfig').util.root_pattern(".eslintrc", ".eslintrc.json", "package.json"),
+-- }
+
+
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require('mason').setup({ PATH = "prepend" })
@@ -1383,9 +1390,49 @@ vim.diagnostic.config {
 
 -- disable perl
 vim.g.loaded_perl_provider = 0
+
 -- Prettier
-vim.g["prettier#autoformat"] = 1
+-- vim.g["prettier#autoformat"] = 0
 vim.g["prettier#autoformat_require_pragma"] = 0
+
+local prettier_config_path = vim.fn.stdpath('config') .. '/.prettier_autoformat'
+
+-- Function to save the value to a file
+local function save_prettier_autoformat()
+	local file = io.open(prettier_config_path, 'w')
+	if file then
+		file:write(vim.g["prettier#autoformat"])
+		file:close()
+	else
+		print("Error: Unable to save Prettier autoformat setting!")
+	end
+end
+
+-- Function to load the value from a file
+local function load_prettier_autoformat()
+	local file = io.open(prettier_config_path, 'r')
+	if file then
+		local value = file:read('*a')
+		file:close()
+		vim.g["prettier#autoformat"] = tonumber(value) or 0
+	else
+		vim.g["prettier#autoformat"] = 0 -- Default to 0 if file doesn't exist
+	end
+end
+
+-- Toggle function
+function TogglePrettierAutoformat()
+	vim.g["prettier#autoformat"] = vim.g["prettier#autoformat"] == 0 and 1 or 0
+	print("Prettier Autoformat: " .. vim.g["prettier#autoformat"])
+	save_prettier_autoformat() -- Save after toggling
+end
+
+-- Load the setting when Neovim starts
+load_prettier_autoformat()
+
+-- Keybinding to toggle
+vim.api.nvim_set_keymap('n', '<leader>tp', ':lua TogglePrettierAutoformat()<CR>', { noremap = true, silent = true })
+
 
 -- copilot
 vim.g.copilot_filetypes = {
