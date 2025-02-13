@@ -1165,6 +1165,7 @@ require('lspconfig').texlab.setup {
 }
 
 vim.g.tex_flavor = 'latex'
+vim.g.vimtex_format_enabled = 1
 
 -- require('lspconfig').eslint.setup {
 -- 	cmd = { "node_modules/.bin/eslint", "--stdin" },
@@ -1313,7 +1314,7 @@ require('lspconfig').clangd.setup {
 -- Setup VHDL LS
 require 'lspconfig'.vhdl_ls.setup {
 	cmd = { "vhdl_ls" },  -- Ensure vhdl_ls is installed and in PATH
-	root_dir = function(fname)
+	root_dir = function(_)
 		return vim.loop.cwd() -- Set root directory to the current working directory
 	end,
 	on_attach = function(client)
