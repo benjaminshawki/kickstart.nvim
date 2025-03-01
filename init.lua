@@ -83,6 +83,26 @@ require('lazy').setup({
 		},
 	},
 	{
+		"kdheepak/lazygit.nvim",
+		lazy = true,
+		cmd = {
+			"LazyGit",
+			"LazyGitConfig",
+			"LazyGitCurrentFile",
+			"LazyGitFilter",
+			"LazyGitFilterCurrentFile",
+		},
+		-- optional for floating window border decoration
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+		},
+		-- setting the keybinding for LazyGit with 'keys' is recommended in
+		-- order to load the plugin when the command is run for the first time
+		keys = {
+			{ "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" }
+		}
+	},
+	{
 		-- Adds git related signs to the gutter, as well as utilities for managing changes
 		'lewis6991/gitsigns.nvim',
 		opts = {
@@ -222,7 +242,7 @@ require('lazy').setup({
 	'moll/vim-bbye',
 	'simeji/winresizer',
 
-	{ "junegunn/fzf", build = "./install --bin" },
+	{ "junegunn/fzf",          build = "./install --bin" },
 	'machakann/vim-sandwich',
 	'wincent/ferret',
 
@@ -236,7 +256,6 @@ require('lazy').setup({
 
 	'jez/vim-superman',
 	'github/copilot.vim',
-
 	-- install without yarn or npm
 	{
 		"iamcco/markdown-preview.nvim",
@@ -253,7 +272,7 @@ require('lazy').setup({
 	{
 		"prettier/vim-prettier",
 		run = "yarn install",
-		ft = { "javascript", "typescript", "typescriptreact", "javascriptreact", "mjs", "mts", "css", "less", "scss", "json", "graphql", "vue", "yaml", "html" },
+		ft = { "javascript", "typescript", "typescriptreact", "javascriptreact", "mjs", "mts", "css", "less", "scss", "json", "graphql", "vue", "yaml", "html", "markdown" },
 	},
 	"nanotee/zoxide.vim",
 	"mbbill/undotree",
@@ -341,7 +360,8 @@ require('lazy').setup({
 	},
 	{
 		"lervag/vimtex",
-		lazy = false, -- we don't want to lazy load VimTeX
+		-- lazy = false, -- we don't want to lazy load VimTeX
+		ft = { "tex", "plaintex", "latex" },
 		-- tag = "v2.15", -- uncomment to pin to a specific release
 		init = function()
 			-- VimTeX configuration goes here
@@ -359,6 +379,8 @@ require('lazy').setup({
 		dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
 		opts = {},
 	},
+	{ "adalessa/laravel.nvim", }
+
 	--   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 
 	--    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
@@ -1027,7 +1049,7 @@ local servers = {
 	dockerls = {},
 	docker_compose_language_service = {},
 	awk_ls = {},
-
+	phpactor = {},
 	-- omnisharp = {},
 
 	-- grammarly = {
