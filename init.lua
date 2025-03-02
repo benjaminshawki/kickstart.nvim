@@ -379,7 +379,7 @@ require('lazy').setup({
 		dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
 		opts = {},
 	},
-	{ "adalessa/laravel.nvim", }
+	{ "adalessa/laravel.nvim", },
 
 	--   NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
 
@@ -747,6 +747,8 @@ end, { desc = "Find directories from the Git root" })
 vim.api.nvim_create_user_command('FindFilesCurrentDir', function()
 	open_telescope_find_directories(false)
 end, { desc = "Find directories from the current directory" })
+
+require("custom.unsaved_buffers")
 
 -- Key mappings
 vim.api.nvim_set_keymap('n', '<leader>sm', ':FindFilesGitRoot<CR>',
