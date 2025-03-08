@@ -748,7 +748,9 @@ vim.api.nvim_create_user_command('FindFilesCurrentDir', function()
 	open_telescope_find_directories(false)
 end, { desc = "Find directories from the current directory" })
 
+-- CUSTOM CONFIGURATION
 require("custom.unsaved_buffers")
+require("custom.copy_diff_from_branch")
 
 -- Key mappings
 vim.api.nvim_set_keymap('n', '<leader>sm', ':FindFilesGitRoot<CR>',
@@ -1524,7 +1526,12 @@ vim.api.nvim_create_user_command("StopLatexPreview", StopLatexPreview, {})
 
 
 -- Screenshots from clipboard to markdown
-vim.api.nvim_set_keymap('n', '<Leader>p', ':call mdip#MarkdownClipboardImage()<CR>', { noremap = false, silent = true })
+vim.api.nvim_set_keymap('n', '<Leader>pp', ':call mdip#MarkdownClipboardImage()<CR>',
+	{ noremap = false, silent = true, desc = 'Paste image from clipboard in markdown' })
+vim.api.nvim_set_keymap('n', '<Leader>put', ":pu=strftime('%c')<CR>",
+	{ noremap = false, silent = true, desc = 'Insert current time' })
+
+
 
 -- Map <leader> followed by a number to switch to that tab
 for i = 1, 9 do
